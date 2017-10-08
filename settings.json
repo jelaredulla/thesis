@@ -1,5 +1,25 @@
 {
-  "SeeDocsAt": "https://github.com/Microsoft/AirSim/blob/master/docs/settings.md",
-  "ViewMode": "Fpv",
-  "SettingsVersion": 1.0
+	"SeeDocsAt": "https://github.com/Microsoft/AirSim/blob/master/docs/settings.md",
+	"SettingsVersion": 1.0,
+	"ViewMode": "FlyWithMe",
+	"SimpleFlightA": {
+		"FirmwareName": "SimpleFlight",
+		"DefaultVehicleState": "Armed",
+		"RC": {
+		  "RemoteControlID": 0,
+		  "AllowAPIWhenDisconnected": false,
+		  "AllowAPIAlways": true
+		},
+		"ApiServerPort": 41451
+	},
+	"SimpleFlightB": {
+		"FirmwareName": "SimpleFlight",
+		"DefaultVehicleState": "Armed",
+		"RC": {
+		  "RemoteControlID": 0,
+		  "AllowAPIWhenDisconnected": false,
+		  "AllowAPIAlways": true
+		},
+		"ApiServerPort": 41452
+	}
 }
