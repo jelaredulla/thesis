@@ -35,7 +35,7 @@ class DronePlayer(MultirotorClient):
     CAMERA_VIEWS = {"first person": AirSimImageType.Scene,\
                     "depth": AirSimImageType.DepthPerspective,\
                     "segmentation": AirSimImageType.Segmentation}
-    TAKEOFF_MAX_TIME = 0 # maximum time for drone to reach
+    TAKEOFF_MAX_TIME = 3 # maximum time for drone to reach
                           # takeoff altitude, in seconds
     
     def __init__(self, ip = "127.0.0.1", port = 41451):
@@ -330,6 +330,7 @@ class Pursuer(PlayerModel):
 
         
 class PositionPlotter(tk.Canvas):
+    PLAYER_COLOURS = ["blue", "red", "green", "yellow"]
     WIDTH = 500
     HEIGHT = 1000
     MAX_X = 10
@@ -345,6 +346,8 @@ class PositionPlotter(tk.Canvas):
         
         self._m_y = float(PositionPlotter.HEIGHT) / (PositionPlotter.MAX_Y - PositionPlotter.MIN_Y)
         self._c_y = -self._m_y * PositionPlotter.MIN_Y
+
+        self._col_index = 0
 
     def scale_x(self, x):
         return round(self._m_x * x + self._c_x)
@@ -363,7 +366,10 @@ class PositionPlotter(tk.Canvas):
             planar_points.append(self.planar_scale(x, y))
 
         for i in range(len(planar_points[:-1])):
-            self.create_line(planar_points[i], planar_points[i+1])
+            self.create_line(planar_points[i], planar_points[i+1],\
+                             fill = PositionPlotter.PLAYER_COLOURS[self._col_index])
+
+        self._col_index += 1
 
 
     def update_plot(self, player):
@@ -442,6 +448,10 @@ class GameSim(object):
         self._p = DronePlayer("", 41451)
         self._e = DronePlayer("", 41452)
 
+        self._pAngle = 0
+        self._speed = 0.5
+        self._R = 0.1
+
         self._p.confirmConnection()
         self._p.enableApiControl(True)
         self._p.loop_arm()
@@ -452,13 +462,75 @@ class GameSim(object):
 
         self.both_takeoff()
 
+        self.chase()
+        self.plot_paths()
+
+
     def both_takeoff(self):
-        self._p.loop_takeoff()
         self._e.loop_takeoff()
+        self._e.moveToPosition(8, 0, -2.5, 10)
+
+        self._p.loop_takeoff()
     
 
+    def chase(self):
+        self._e.rotateToYaw(90, 3)
+        self._e.moveByVelocityZ(0, -0.4, -2.5, 50)
+        while True:
+            p_pos = self._p.getPosition()
+            x_p, y_p, z_p = (p_pos.x_val, p_pos.y_val, p_pos.z_val)
+            
+            e_pos = self._e.getPosition()
+            x_e, y_e, z_e = (e_pos.x_val, e_pos.y_val, e_pos.z_val)
+
+            self._e._path.append((x_e, y_e, z_e))
+            self._p._path.append((x_p, y_p, z_p))
+            
+##            print("Pursuer at {}".format((p_pos.x_val, p_pos.y_val, p_pos.z_val)))
+##            print("Evader at {}".format((e_pos.x_val, e_pos.y_val, e_pos.z_val)))
 
 
+            x = (x_e - x_p) * math.cos(self._pAngle) \
+                    - (y_e - y_p) * math.sin(self._pAngle)
+            y = (x_e- x_p) * math.sin(self._pAngle) \
+                    + (y_e - y_p) * math.cos(self._pAngle)
+
+            d = math.sqrt(x**2 + y**2)
+
+            if d < 2:
+                return True
+
+            if (x == 0):
+                if (y < 0):
+                    phi = 1
+                else:
+                    phi = 0
+            else:
+                phi = np.sign(x)
+
+            angle_dot = float( self._speed * phi ) / self._R
+            yaw_change = angle_dot * TIME_STEP
+            self._pAngle += yaw_change
+
+##            self._p.moveByAngle(0, 0, -2.5, -math.degrees(yaw_change), 1)
+
+            p_x_dot = self._speed * math.sin(self._pAngle)
+            p_y_dot = self._speed * math.cos(self._pAngle)
+
+##            self._p.rotateToYaw(math.degrees(yaw_change), 0.5)
+            self._p.moveByVelocityZ(p_x_dot, p_y_dot, -2.5, 1,\
+                                    DrivetrainType.ForwardOnly, YawMode(False, math.degrees(self._pAngle)))
+
+
+            time.sleep(TIME_STEP)
+            
+
+    def plot_paths(self):
+        root = tk.Tk()
+        app = PositionPlotter(root)
+        app.plot_path(self._e._path)
+        app.plot_path(self._p._path)
+        root.mainloop()
 
 
 if __name__ == "__main__":

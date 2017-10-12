@@ -156,7 +156,7 @@ class AirSimClientBase:
             time.sleep(1)
             home = self.getHomeGeoPoint()
             print('X', end='')
-        print('')
+        print('Connected')
 
     def getHomeGeoPoint(self):
         return GeoPoint.from_msgpack(self.client.call('getHomeGeoPoint'))
