@@ -1,0 +1,18 @@
+package com.mycompany.app;
+
+import org.msgpack.annotation.Index;
+import org.msgpack.annotation.Message;
+
+public class AirSimMessages {
+	@Message
+	public static class GeoPoint {
+		@Index(0)
+	    	public double latitude;
+		
+		@Index(1)
+	    	public double longitude;
+		
+		@Index(2)
+	    	public double altitude;
+	}
+}

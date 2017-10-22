@@ -1,0 +1,17 @@
+package com.mycompany.app;
+
+import java.net.UnknownHostException;
+/**
+ * Hello world!
+ *
+ */
+public class App 
+{
+    public static void main( String[] args ) throws UnknownHostException
+    {
+        AirSimClient client = new AirSimClient("", 41451);
+		System.out.println( "Hello World!" );
+		
+		client.confirmConnection();
+    }
+}

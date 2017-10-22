@@ -1,0 +1,24 @@
+package com.mycompany.app;
+
+public class AirSimMessages {
+}
+
+class AirSimImageType {
+    public static int Scene = 0;
+    public static int DepthPlanner = 1;
+    public static int DepthPerspective = 2;
+    public static int DepthVis = 3;
+    public static int DisparityNormalized = 4;
+    public static int Segmentation = 5;
+    public static int SurfaceNormals = 6;
+}
+
+class Drivetraintype {
+	public static int MaxDegreeOfFreedom = 0;
+	public static int ForwardOnly = 1;    
+}
+
+class LandedState {
+	public static int Landed = 0;
+	public static int Flying = 1;
+}

@@ -1,0 +1,70 @@
+package com.mycompany.app;
+
+import java.io.IOException;
+import java.net.UnknownHostException;
+
+import org.msgpack.type.Value;
+import manualInput.XboxController;
+
+/**
+ * Hello world!
+ *
+ */
+public class App 
+{
+    public static void main( String[] args ) throws InterruptedException, IOException
+    {
+        DronePlayer pursuer = new DronePlayer("", 41451);
+		System.out.println( "Hello World!" );
+		
+		pursuer.confirmConnection();
+		pursuer.enableApiControl(true);
+		boolean respP = pursuer.isApiControlEnabled();
+		System.out.println(respP);
+		
+		
+		
+		DronePlayer evader = new DronePlayer("", 41452);
+		evader.confirmConnection();
+		evader.enableApiControl(true);
+		boolean respE = evader.isApiControlEnabled();
+		System.out.println(respE);
+		
+		evader.armDisarm(true);
+		evader.takeoff(20);
+		
+		evader.moveToZ(-7, 1);
+		evader.moveByVelocityZ(new Vector3r(0, 1, 0), new Vector3r(0,  0, -7), 50);
+				
+	
+		
+		try {
+			
+			
+			pursuer.armDisarm(true);
+			pursuer.takeoff(20);
+			
+			double t = 0;
+			XboxController con = new XboxController();
+			
+			while (t < 30) {
+				double angle = con.pollLeftJoyStick();
+				Vector3r eVel = 
+				evader.rotateToYaw((float) angle);
+				
+				Vector3r ePos = evader.getPosition();
+				System.out.println(ePos);
+				
+				pursuer.moveByVelocityZ(new Vector3r(0, 1, 0), ePos, 50);
+				
+				Thread.sleep(100);
+				t += 0.1;
+			}
+			
+		} catch (Exception e) {
+			System.out.println(e.getStackTrace());
+		}
+		
+
+    }
+}

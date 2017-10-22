@@ -1,0 +1,62 @@
+package com.mycompany.app;
+
+import java.awt.geom.Point2D;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+
+
+
+
+public class DronePlayer extends MultirotorClient {
+	public final static float dt = 0.5;
+	protected Vector3r position; // (x, y, z) position in fixed global frame
+	protected float theta; // orientation in fixed global frame
+	protected double maxV; // maximum velocity, m/s
+	private ArrayList<Point2D> path = new ArrayList<Point2D>(); // history of player movement
+	
+	DronePlayer(String ip, int port, float v) throws UnknownHostException {
+		super(ip, port);
+		
+		position = new Vector3r(0f, 0f, 0f);
+		theta = 0;
+		maxV = v;
+		
+		// TODO Auto-generated constructor stub
+	}
+	
+	public void updatePositionData() {
+		position = getPosition();
+	}
+	
+	public Vector3r getPos() {
+		return position;
+	}
+	
+	public float getTheta() {
+		return theta;
+	}
+	
+	public float getMaxV() {
+		return (float) maxV;
+	}
+	
+	
+	public void move() {
+		
+		Vector3r vel = new Vector3r((float) (maxV*Math.sin(theta)), (float) (maxV*Math.cos(theta)), 0f);
+		moveByVelocityZ(vel, position, dt);
+		
+		
+		pos.setLocation(pos.getX() + v_x*dt, pos.getY() + v_y*dt);
+		path.add((Point2D) pos.clone());
+		
+		//System.out.println("Point is " + pos);
+	}
+	
+	public void steer(float dir) {
+		theta = dir;
+	}
+	
+
+}
+

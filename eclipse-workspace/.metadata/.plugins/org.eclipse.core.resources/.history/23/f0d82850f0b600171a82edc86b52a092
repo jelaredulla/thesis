@@ -1,0 +1,12 @@
+package com.mycompany.app;
+
+import java.net.UnknownHostException;
+
+public class DronePursuer extends DronePlayer {
+
+	DronePursuer(String ip, int port, float v) throws UnknownHostException {
+		super(ip, port, v);
+		// TODO Auto-generated constructor stub
+	}
+
+}

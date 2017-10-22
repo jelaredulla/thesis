@@ -1,0 +1,84 @@
+package com.mycompany.app;
+
+import java.io.IOException;
+import java.net.UnknownHostException;
+
+import org.msgpack.type.Value;
+import manualInput.XboxController;
+import visualiser.GlobalField;
+
+/**
+ * Hello world!
+ *
+ */
+public class App 
+{
+    public static void main( String[] args ) throws InterruptedException, IOException
+    {
+    	GlobalField g = new GlobalField(50, 0.5);
+    	XboxController con = new XboxController();
+//    	double t1 = 0;
+//    	double angle1;
+//    	while (t1 < 15) {
+//			angle1 = con.pollLeftJoyStick();
+//			System.out.println(angle1);
+//			t1 += 0.1;
+//			Thread.sleep(100);
+//    	}
+    	
+        DronePlayer pursuer = new DronePlayer("", 41451);
+		System.out.println( "Hello World!" );
+		
+		pursuer.confirmConnection();
+		pursuer.enableApiControl(true);
+		boolean respP = pursuer.isApiControlEnabled();
+		System.out.println(respP);
+		
+		
+		
+		DronePlayer evader = new DronePlayer("", 41452);
+		evader.confirmConnection();
+		evader.enableApiControl(true);
+		boolean respE = evader.isApiControlEnabled();
+		System.out.println(respE);
+		
+		evader.armDisarm(true);
+		evader.takeoff(20);
+		
+		evader.moveToZ(-7, 1);
+		evader.moveByVelocityZ(new Vector3r(0, 1, 0), new Vector3r(0,  0, -7), 15);
+				
+	
+		
+		try {
+			
+			
+			pursuer.armDisarm(true);
+			pursuer.takeoff(20);
+			
+			double t = 0;
+			
+			double angle;
+			while (t < 300) {
+				angle = con.pollLeftJoyStick();
+				//System.out.println(angle);
+				Vector3r eVel = new Vector3r((float) Math.sin(angle), (float) Math.cos(angle), 0f);
+				//System.out.println("eVel = "+eVel.toString());
+				pursuer.moveByVelocityZ(eVel, new Vector3r(0,  0, -7), 20);
+//				
+//				Vector3r ePos = evader.getPosition();
+//				System.out.println(ePos);
+				
+				//evader.moveByVelocityZ(new Vector3r(0, 1, 0), new Vector3r(0,  0, -7), 20);
+				
+				Thread.sleep(100);
+				t += 0.1;
+			}
+			
+		} catch (Exception e) {
+			System.out.println(e.getStackTrace());
+		}
+		
+
+    }
+}

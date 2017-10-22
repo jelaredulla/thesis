@@ -1,0 +1,16 @@
+package com.mycompany.app;
+
+import java.net.UnknownHostException;
+
+
+
+
+public class DronePlayer extends MultirotorClient {
+
+	DronePlayer(String ip, int port) throws UnknownHostException {
+		super(ip, port);
+		// TODO Auto-generated constructor stub
+	}
+
+}
+

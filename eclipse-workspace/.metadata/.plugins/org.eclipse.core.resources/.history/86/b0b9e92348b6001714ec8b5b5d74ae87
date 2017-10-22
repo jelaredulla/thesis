@@ -1,0 +1,221 @@
+package com.mycompany.app;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import org.msgpack.type.MapValue;
+import org.msgpack.type.Value;
+
+public class AirSimMessages {
+}
+
+class AirSimImageType {
+    public static int Scene = 0;
+    public static int DepthPlanner = 1;
+    public static int DepthPerspective = 2;
+    public static int DepthVis = 3;
+    public static int DisparityNormalized = 4;
+    public static int Segmentation = 5;
+    public static int SurfaceNormals = 6;
+}
+
+class Drivetraintype {
+	public static int MaxDegreeOfFreedom = 0;
+	public static int ForwardOnly = 1;    
+}
+
+class LandedState {
+	public static int Landed = 0;
+	public static int Flying = 1;
+}
+
+class Vector3r {
+	protected HashMap<String, Float> pos = new HashMap<String, Float>();
+
+    public Vector3r(float x_val, float y_val, float z_val) {
+    	pos.put("x_val", x_val);
+    	pos.put("y_val", y_val);
+    	pos.put("z_val", z_val);
+    }
+    
+    public Vector3r() {
+    	this(0f, 0f, 0f);
+    }
+    
+    public Vector3r(MapValue response) {
+    	for (Value key : response.keySet()) {
+    		String k = key.asRawValue().getString();
+    		float val = response.get(key).asFloatValue().getFloat();
+    		pos.put(k, val);
+    	}
+    }
+    
+    public List<Float> getXYZ() {
+    	List<Float> xyz = new ArrayList<Float>();
+    	
+    	xyz.add(pos.get("x_val"));
+    	xyz.add(pos.get("y_val"));
+    	xyz.add(pos.get("z_val"));
+    	
+    	return xyz;
+    }
+    
+    public String toString() {
+    	return String.format("[x, y, z] = %s", getXYZ().toString());
+    }  
+}
+    
+class Quaternionr extends Vector3r {
+
+    public Quaternionr (float x_val, float y_val, float z_val, float w_val) {
+        super(x_val, y_val, z_val);
+        pos.put("w_val", w_val);
+    }
+    
+    public Quaternionr () {
+        super();
+        pos.put("w_val", 1f);
+    }
+    
+    public List<Float> getXYZW() {
+    	List<Float> xyzw = getXYZ();
+    	xyzw.add(pos.get("w_val"));
+    	return xyzw;
+    }
+    
+    public String toString() {
+    	return String.format("[x, y, z, w] = %s", getXYZW().toString());
+    }
+}
+
+class Pose {
+	public Vector3r position = new Vector3r();
+	public Quaternionr orientation = new Quaternionr();
+
+    public Pose(Vector3r position_val, Quaternionr orientation_val) {
+        this.position = position_val;
+        this.orientation = orientation_val;
+    }
+}
+
+class CollisionInfo {
+	public boolean has_collided = false;
+	public Vector3r normal = new Vector3r();
+	public Vector3r impact_point = new Vector3r();
+	public Vector3r position = new Vector3r();
+	public float penetration_depth = 0;
+	public float time_stamp = 0;
+}
+
+class GeoPoint {
+	protected HashMap<String, Float> gp = new HashMap<String, Float>();
+    
+    public GeoPoint(float latitude, float longitude, float altitude) {
+    	gp.put("latitude", latitude);
+    	gp.put("longitude", longitude);
+    	gp.put("altitude", altitude);
+    }
+    
+    public GeoPoint() {
+    	this(0f, 0f, 0f);
+    }
+    
+    public GeoPoint(MapValue response) {
+    	for (Value key : response.keySet()) {
+    		String k = key.asRawValue().getString();
+    		float val = response.get(key).asFloatValue().getFloat();
+    		
+    		gp.put(k, val);    		
+    	}
+    }
+    
+    public List<Float> getGlobalPos() {
+    	List<Float> result = new ArrayList<Float>();
+    	
+    	result.add(gp.get("latitude"));
+    	result.add(gp.get("longitude"));
+    	result.add(gp.get("altitude"));
+    	
+    	return result;
+    }
+    
+    public boolean isZero() {
+    	List<Float> zero = new ArrayList<Float>();
+    	zero.add(0f);
+    	zero.add(0f);
+    	zero.add(0f);
+    	
+    	return this.getGlobalPos().equals(zero);
+    }
+    
+    public String toString() {
+    	return String.format("Lat=%f, Long=%f, Alt=%f", gp.get("latitude"),
+    			gp.get("longitude"), gp.get("altitude"));
+    }
+}
+
+class YawMode {
+	public boolean is_rate = true;
+	public float yaw_or_rate = 0;
+    
+    public YawMode(boolean is_rate, float yaw_or_rate) {
+        this.is_rate = is_rate;
+        this.yaw_or_rate = yaw_or_rate;
+    }
+    
+    public YawMode() {
+    	this.is_rate = false;
+    	this.yaw_or_rate = 0;
+    }
+    
+    public YawMode(float yaw_or_rate) {
+    	this.is_rate = false;
+    	this.yaw_or_rate = yaw_or_rate;
+    }
+}
+
+
+class ImageRequest {
+	public int camera_id = 0;
+	public int image_type = AirSimImageType.Scene;
+	public boolean pixels_as_float = false;
+	public boolean compress = false;
+
+    public ImageRequest(int camera_id, int image_type, boolean pixels_as_float, boolean compress) {
+        this.camera_id = camera_id;
+        this.image_type = image_type;
+        this.pixels_as_float = pixels_as_float;
+        this.compress = compress;
+    }
+    
+    public ImageRequest(int camera_id, int image_type) {
+        this.camera_id = camera_id;
+        this.image_type = image_type;
+        this.pixels_as_float = false;
+        this.compress = true;
+    }
+    
+    public ImageRequest(int camera_id, int image_type, boolean pixels_as_float) {
+        this.camera_id = camera_id;
+        this.image_type = image_type;
+        this.pixels_as_float = pixels_as_float;
+        this.compress = true;
+    }
+
+
+}
+
+class ImageResponse {
+	public int image_data_uint8 = 0;
+	public float image_data_float = 0;
+	public Vector3r camera_position = new Vector3r();
+	public Quaternionr camera_orientation = new Quaternionr();
+	public int time_stamp = 0;
+	public String message = "";
+	public float pixels_as_float = 0;
+	public boolean compress = true;
+	public int width = 0;
+	public int height = 0;
+	public int image_type = AirSimImageType.Scene;
+}

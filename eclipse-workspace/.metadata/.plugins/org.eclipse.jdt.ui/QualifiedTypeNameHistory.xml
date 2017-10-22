@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+<fullyQualifiedTypeName name="org.nd4j.shade.jackson.databind.ObjectMapper"/>
+<fullyQualifiedTypeName name="org.msgpack.rpc.loop.EventLoop"/>
+<fullyQualifiedTypeName name="org.msgpack.unpacker.Converter"/>
+<fullyQualifiedTypeName name="org.msgpack.unpacker.BufferUnpacker"/>
+<fullyQualifiedTypeName name="org.msgpack.template.Template"/>
+<fullyQualifiedTypeName name="org.msgpack.template.TemplateRegistry"/>
+<fullyQualifiedTypeName name="org.msgpack.template.builder.ReflectionTemplateBuilder"/>
+<fullyQualifiedTypeName name="org.msgpack.type.Value"/>
+<fullyQualifiedTypeName name="com.mycompany.app.AirSimMessages.GeoPoint"/>
+<fullyQualifiedTypeName name="java.util.Map"/>
+<fullyQualifiedTypeName name="org.msgpack.annotation.Index"/>
+<fullyQualifiedTypeName name="com.fasterxml.jackson.databind.ObjectMapper"/>
+<fullyQualifiedTypeName name="org.msgpack.annotation.Message"/>
+<fullyQualifiedTypeName name="org.msgpack.MessagePack"/>
+<fullyQualifiedTypeName name="org.msgpack.unpacker.Unpacker"/>
+<fullyQualifiedTypeName name="visualiser.GlobalField"/>
+<fullyQualifiedTypeName name="com.mycompany.app.AirSimMessages.YawMode"/>
+<fullyQualifiedTypeName name="java.util.List"/>
+<fullyQualifiedTypeName name="java.awt.geom.Point2D.Float"/>
+</qualifiedTypeNameHistroy>

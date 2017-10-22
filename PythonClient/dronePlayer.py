@@ -534,6 +534,9 @@ class GameSim(object):
 
 
 if __name__ == "__main__":
+    orig = YawMode(True, 0.456674)
+    print orig.to_msgpack()
+    
     together = len(sys.argv) == 1
     
     if together:
