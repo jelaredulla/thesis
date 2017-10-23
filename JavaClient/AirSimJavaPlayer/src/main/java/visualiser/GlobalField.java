@@ -14,6 +14,8 @@ public class GlobalField extends JPanel implements KeyListener {
 	
 	private int panelWidth;
 	private int panelHeight;
+	
+	private double boundary;
 	private double captureL;
 	
 	public final static double headerAngle = Math.PI/18;
@@ -21,9 +23,9 @@ public class GlobalField extends JPanel implements KeyListener {
 
 	// current positions and poses
 	private Point2D pPos = null;
-	private float pTheta;
+	private double pTheta;
 	private Point2D ePos = null;
-	private float eTheta;
+	private double eTheta;
 	
 	private HashMap<String, List<Line2D>> pursuerPaths = new HashMap<String, List<Line2D>>();
 	//private List<Line2D> pursuerPath = new ArrayList<Line2D>();
@@ -36,9 +38,10 @@ public class GlobalField extends JPanel implements KeyListener {
 	/**
 	 * Constructor
 	 */
-	public GlobalField(int panelSize, double boundary, double l) {
+	public GlobalField(int panelSize, double b, double l) {
 		panelWidth = panelSize;
 		panelHeight = panelSize;
+		boundary = b;
 		captureL = l;
 		
 		frame = new JFrame("Playing Field");
@@ -49,8 +52,16 @@ public class GlobalField extends JPanel implements KeyListener {
 		frame.setVisible(true);
 	}
 	
+	public int scaleWorldToPanelWidth(double value) {
+		return (int) ((panelWidth*(value+boundary))/(2*boundary));
+	}
+	
+	public int scaleWorldToPanelHeight(double value) {
+		return (int) ((panelHeight*(value+boundary))/(2*boundary));
+	}
+	
 	/**
-	 * Sets pursuer segments to draw, coordinates between 0 and 1
+	 * Sets pursuer segments to draw
 	 * @param input List of Point2D
 	 */
 	public void setPursuerPath(List<Point2D> input, String name) {
@@ -68,12 +79,13 @@ public class GlobalField extends JPanel implements KeyListener {
 	}
 	
 	/**
-	 * Sets evader segments to draw, coordinates between 0 and 1
+	 * Sets evader segments to draw
 	 * @param input List of Point2D
 	 */
 	public void setEvaderPath(List<Point2D> input) {
 		clearEvader();
 		for (int i = 0; i < input.size() - 1; i++) {
+			evaderPath.add(new Line2D.Float(input.get(i), input.get(i + 1)));
 		}
 	}
 
@@ -97,12 +109,12 @@ public class GlobalField extends JPanel implements KeyListener {
 		evaderPath.add(input);
 	}
 	
-	public void setPursuerState(Point2D pos, float theta) {
+	public void setPursuerState(Point2D pos, double d) {
 		pPos = pos;
-		pTheta = theta;
+		pTheta = d;
 	}
 	
-	public void setEvaderState(Point2D pos, float theta) {
+	public void setEvaderState(Point2D pos, double theta) {
 		ePos = pos;
 		eTheta = theta;
 	}
@@ -153,10 +165,10 @@ public class GlobalField extends JPanel implements KeyListener {
 		
 		// Draw evader path
 		for (Line2D l : evaderPath) {
-			x1 = (int) (l.getX1() * panelWidth);
-			y1 = (int) (l.getY1() * panelHeight);
-			x2 = (int) (l.getX2() * panelWidth);
-			y2 = (int) (l.getY2() * panelHeight);
+			x1 = scaleWorldToPanelWidth(l.getX1());
+			y1 = scaleWorldToPanelHeight(l.getY1());
+			x2 = scaleWorldToPanelWidth(l.getX2());
+			y2 = scaleWorldToPanelHeight(l.getY2());
 			g.setColor(Color.blue);
 			g.drawLine(x1, panelHeight - y1, x2, panelHeight - y2);
 		}
@@ -164,10 +176,10 @@ public class GlobalField extends JPanel implements KeyListener {
 		for (List<Line2D> path : pursuerPaths.values()) {
 			// Draw pursuer path
 			for (Line2D l : path) {
-				x1 = (int) (l.getX1() * panelWidth);
-				y1 = (int) (l.getY1() * panelHeight);
-				x2 = (int) (l.getX2() * panelWidth);
-				y2 = (int) (l.getY2() * panelHeight);
+				x1 = scaleWorldToPanelWidth(l.getX1());
+				y1 = scaleWorldToPanelHeight(l.getY1());
+				x2 = scaleWorldToPanelWidth(l.getX2());
+				y2 = scaleWorldToPanelHeight(l.getY2());
 				g.setColor(Color.red);
 				g.drawLine(x1, panelHeight - y1, x2, panelHeight - y2);
 			}
@@ -175,10 +187,10 @@ public class GlobalField extends JPanel implements KeyListener {
 			// Draw pursuer capture radius
 			if (!path.isEmpty()) {
 				Line2D lastMovement = path.get(path.size() - 1);
-				x2 = (int) (lastMovement.getX2() * panelWidth);
-				y2 = (int) (lastMovement.getY2() * panelHeight);
-				int rx = (int) (captureL * panelWidth); 
-				int ry = (int) (captureL * panelHeight); 
+				x2 = scaleWorldToPanelWidth(lastMovement.getX2());
+				y2 = scaleWorldToPanelHeight(lastMovement.getY2());
+				int rx = (int) ((captureL/(2*boundary)) * panelWidth); 
+				int ry = (int) ((captureL/(2*boundary)) * panelHeight); 
 				g.setColor(Color.orange);
 				g.drawOval(x2 - rx, panelHeight - (y2 + ry), 2*rx, 2*ry);
 			}
@@ -195,20 +207,20 @@ public class GlobalField extends JPanel implements KeyListener {
 		}
 	}
 
-	private void drawStateTriangle(Point2D pos, float theta, Graphics g) {
+	private void drawStateTriangle(Point2D pos, double pTheta2, Graphics g) {
 		double x = pos.getX();
 		double y = pos.getY();
 	
-		double[] xCoords = {x, x + headerLength*Math.sin(theta + Math.PI + headerAngle),
-				x + headerLength*Math.sin(theta + Math.PI - headerAngle)};
-		double[] yCoords = {y, y + headerLength*Math.cos(theta + Math.PI + headerAngle),
-				y + headerLength*Math.cos(theta + Math.PI - headerAngle)};
+		double[] xCoords = {x, x + headerLength*Math.sin(pTheta2 + Math.PI + headerAngle),
+				x + headerLength*Math.sin(pTheta2 + Math.PI - headerAngle)};
+		double[] yCoords = {y, y + headerLength*Math.cos(pTheta2 + Math.PI + headerAngle),
+				y + headerLength*Math.cos(pTheta2 + Math.PI - headerAngle)};
 		
 		int[] xCoordsPixels = new int[3];
 		int[] yCoordsPixels = new int[3];
 		for (int i = 0; i < 3; i++) {
-			xCoordsPixels[i] = (int) (xCoords[i] * panelWidth);
-			yCoordsPixels[i] = panelHeight - (int) (yCoords[i] * panelHeight);
+			xCoordsPixels[i] = scaleWorldToPanelWidth(xCoords[i]);
+			yCoordsPixels[i] = panelHeight - scaleWorldToPanelHeight(yCoords[i]);
 		}
 		
 		g.drawPolygon(xCoordsPixels, yCoordsPixels, 3);

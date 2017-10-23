@@ -33,8 +33,9 @@ public class DronePlayer extends MultirotorClient {
 		return position;
 	}
 	
+	// Note: X and Y are swapped for plotting purposes only!!!
 	public Point2D get2DPos() {
-		return new Point2D.Float(position.getX(), position.getY());
+		return new Point2D.Float(position.getY(), position.getX());
 	}
 	
 	public double getTheta() {
@@ -47,6 +48,7 @@ public class DronePlayer extends MultirotorClient {
 	
 	
 	public void move() {
+		rotateToYaw((float) theta);
 		
 		Vector3r vel = new Vector3r((float) (maxV*Math.sin(theta)), (float) (maxV*Math.cos(theta)), 0f);
 		moveByVelocityZ(vel, new Vector3r(0, 0, -7), dt, DrivetrainType.MaxDegreeOfFreedom, new YawMode(true, 0f));

@@ -31,7 +31,7 @@ public class App
 		
 		//Player p = new Player(new Point2D.Double(0.5, 0), 0, 1, 1);
 		
-		GlobalField vis = new GlobalField(100, 30, beta*baseR);
+		GlobalField vis = new GlobalField(1000, 15, beta*baseR);
 		
 		XboxController xbox = new XboxController();
 		
@@ -40,13 +40,13 @@ public class App
 		DronePursuer p = new DronePursuer("", 41451, baseV, baseR, 1, e);
 		
 		setupAPIControl(e, p);
-		
+		double t;
 		while (true) {
 						
 			setupPositions(e, p);
-						
-			while (!p.targetCaught()) {//&& (t < 100000)) {
-				
+			t = 0;			
+			while ((t < 10) || (!p.targetCaught())) {//&& (t < 100000)) {
+				System.out.println("t="+t+", Evader pos: "+e.getPos()+", Pursuer pos: "+p.getPos());
 				//e.steer(Math.sin(t/(16*Math.PI)));
 				if (xbox.gamepadSet()) {
 					e.steer((float) xbox.pollLeftJoyStick());
@@ -56,25 +56,28 @@ public class App
 				
 				e.move();
 				//e.updatePositionData();
-				//System.out.println("Evader pos: "+e.getPos());
+				
 				//System.out.println("Pursuer pos: "+p.getPos());
 				//System.out.println("Speed is perceived as " + p.estimateVelocity());
 				p.stalk();
 				
 				//p.linearPredictStalk();
 				
-//				vis.setPursuerState(p.get2DPos(), p.getTheta());
+				vis.setPursuerState(p.get2DPos(), p.getTheta());
 //				//vis.setPursuerState(p2.getPos(), p2.getTheta(), "p2");
-//				vis.setEvaderState(e.get2DPos(), e.getTheta());
-//				vis.addPursuerSegment(p.getLastMovement(), "p");
-//				//vis.addPursuerSegment(p2.getLastMovement(), "p2");
-//				vis.addEvaderSegment(e.getLastMovement());
+				vis.setEvaderState(e.get2DPos(), e.getTheta());
+				vis.addPursuerSegment(p.getLastMovement(), "p");
+				//vis.addPursuerSegment(p2.getLastMovement(), "p2");
+				vis.addEvaderSegment(e.getLastMovement());
 //				
-//				vis.repaint();
+				vis.repaint();
 				
 				Thread.sleep(100);
+				t += 0.5;
 			}
 			
+			e.hover();
+			p.hover();			
 			
 			vis.setPursuerPath(p.getPath(), "p");
 			//vis.setPursuerPath(p2.getPath(), "p2");
