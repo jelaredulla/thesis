@@ -35,6 +35,15 @@ public class App
 		
 		XboxController xbox = new XboxController();
 		
+//    	double t1 = 0;
+//    	double angle1;
+//    	while (t1 < 15) {
+//			angle1 = xbox.pollLeftJoyStick();
+//			System.out.println(angle1);
+//			t1 += 0.1;
+//			Thread.sleep(100);
+//    	}
+		
 		DronePlayer e = new DronePlayer("", 41452, gamma*baseV);
 		// capture = beta*baseR instead of 0.5
 		DronePursuer p = new DronePursuer("", 41451, baseV, baseR, 1, e);
@@ -104,25 +113,25 @@ public class App
 		
     	if (e.getLandedState() == LandedState.Landed) {
     		e.armDisarm(true);
-    		e.takeoff(0);
+    		e.takeoff(3);
     	}
     	
-    	e.goHome();
+    	//e.goHome();
 
-		e.moveToZ(-7, 1);
-		e.steer(-Math.PI/4);
-		e.moveByVelocityZ(new Vector3r(0, -1, 0), new Vector3r(0,  0, -7), 10);
+		e.moveToZ(-5, 1, 5);
+		e.steer((3*Math.PI)/4);
+		e.moveByVelocityZ(new Vector3r(0, -1, 0), new Vector3r(0,  0, -5), 8);
 		e.updatePositionData();
 		System.out.println(e.getPos());		
 		
 		if (p.getLandedState() == LandedState.Landed) {
 			p.armDisarm(true);
-			p.takeoff(0);
+			p.takeoff(3);
 		}
 		
-		p.goHome();
+		//p.goHome();
 		
-		p.moveToZ(-7, 1);
+		p.moveToZ(-5, 1, 5);
 		p.updatePositionData();
 		System.out.println(p.getPos());
     }

@@ -29,7 +29,7 @@ public class DronePursuer extends DronePlayer {
 	
 	public void steer(double dtheta) {
 		theta += dtheta*0.01f;
-		theta = Math.atan2(Math.sin(theta), Math.cos(theta));
+		//theta = Math.atan2(Math.sin(theta), Math.cos(theta));
 		
 		System.out.println(theta);
 	}
@@ -46,21 +46,21 @@ public class DronePursuer extends DronePlayer {
 		
 		// x, y coords of evader wrt pursuer
 		double x = xDiff*Math.cos(theta) - yDiff*Math.sin(theta);
-		double y = yDiff*Math.sin(theta) + yDiff*Math.cos(theta);
+		double y = -xDiff*Math.sin(theta) + yDiff*Math.cos(theta);
 		
 		System.out.print("x: "+x);
 		System.out.println("y: "+y);
 		
 		// control variable, which is effectively turning radius
 		double phi;
-		if (x == 0) {
-			if (y < 0) {
+		if (y == 0) {
+			if (x < 0) {
 				phi = 1;
 			} else {
 				phi = 0;
 			}
 		} else {
-			phi = Math.signum(x);
+			phi = Math.signum(y);
 		}
 		
 		double dtheta = phi*(maxV/minR);

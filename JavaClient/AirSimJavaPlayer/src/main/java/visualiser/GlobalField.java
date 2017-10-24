@@ -19,7 +19,7 @@ public class GlobalField extends JPanel implements KeyListener {
 	private double captureL;
 	
 	public final static double headerAngle = Math.PI/18;
-	public final static double headerLength = 0.05;
+	public final static double headerLength = 1;
 
 	// current positions and poses
 	private Point2D pPos = null;

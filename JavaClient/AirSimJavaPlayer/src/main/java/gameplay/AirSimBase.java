@@ -216,6 +216,14 @@ class MultirotorClient extends AirSimClientBase {
     	return this.client.callApply("moveToZ", args);
     }
     
+    public Value moveToZ(float z, float velocity, float max_wait_seconds) {
+    	YawMode yaw_mode = new YawMode();
+    	float lookahead = -1;
+    	float adaptive_lookahead = 1;
+        return moveToZ(z, velocity, max_wait_seconds, yaw_mode,
+        		lookahead, adaptive_lookahead);
+    }
+    
     public Value moveToZ(float z, float velocity) {
     	float max_wait_seconds = 60;
     	YawMode yaw_mode = new YawMode();

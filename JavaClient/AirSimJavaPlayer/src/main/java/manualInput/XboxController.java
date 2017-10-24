@@ -38,7 +38,7 @@ public class XboxController {
 	    	float y = -components[0].getPollData();
 	    	float x = components[1].getPollData();
 	    	
-	    	double pose = Math.atan2((double) y, (double) x);
+	    	double pose = Math.atan2((double) x, (double) y);
 	    	return pose;
 		} else {
 			return 0;

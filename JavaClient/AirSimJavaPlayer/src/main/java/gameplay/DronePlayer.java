@@ -10,7 +10,7 @@ import java.util.List;
 public class DronePlayer extends MultirotorClient {
 	public final static float dt = 20f;
 	protected Vector3r position; // (x, y, z) position in fixed global frame
-	protected double theta; // orientation in fixed global frame
+	protected double theta; // orientation in fixed global frame, wrt x-axis
 	protected double maxV; // maximum velocity, m/s
 	private ArrayList<Point2D> path = new ArrayList<Point2D>(); // history of player movement
 	
@@ -33,7 +33,7 @@ public class DronePlayer extends MultirotorClient {
 		return position;
 	}
 	
-	// Note: X and Y are swapped for plotting purposes only!!!
+	// x, y swapped for plotting purposes ONLY!!!
 	public Point2D get2DPos() {
 		return new Point2D.Float(position.getY(), position.getX());
 	}
@@ -48,10 +48,11 @@ public class DronePlayer extends MultirotorClient {
 	
 	
 	public void move() {
-		rotateToYaw((float) theta);
+		//rotateToYaw((float) theta);
 		
-		Vector3r vel = new Vector3r((float) (maxV*Math.sin(theta)), (float) (maxV*Math.cos(theta)), 0f);
-		moveByVelocityZ(vel, new Vector3r(0, 0, -7), dt, DrivetrainType.MaxDegreeOfFreedom, new YawMode(true, 0f));
+		Vector3r vel = new Vector3r((float) (maxV*Math.cos(theta)), (float) (maxV*Math.sin(theta)), 0f);
+		moveByVelocityZ(vel, new Vector3r(0, 0, -5), dt, DrivetrainType.MaxDegreeOfFreedom,
+				new YawMode());
 //		
 //		try {
 //			Thread.sleep((long) (dt*1000));
@@ -89,8 +90,8 @@ public class DronePlayer extends MultirotorClient {
 		double x = position.getX();
 		double y = position.getY();
 		
-		double xDir = Math.signum(Math.sin(theta));
-		double yDir = Math.signum(Math.cos(theta));
+		double xDir = Math.signum(Math.cos(theta));
+		double yDir = Math.signum(Math.sin(theta));
 		
 		double dir = theta;
 		
@@ -102,12 +103,12 @@ public class DronePlayer extends MultirotorClient {
 //		}
 		double boxSide = 10;
 		if (((x <= -boxSide) && (xDir < 0)) || ((x >= boxSide) && (xDir > 0))) {
-			dir = -theta;
-		} else if (((y <= boxSide) && (yDir < 0)) || ((y >= boxSide) && (yDir > 0))) {
 			dir = Math.PI - theta;
+		} else if (((y <= -boxSide) && (yDir < 0)) || ((y >= boxSide) && (yDir > 0))) {
+			dir = -theta;
 		}
 		
-		steer((float) (Math.atan2(Math.sin(dir), Math.cos(dir))));
+		steer((Math.atan2(Math.sin(dir), Math.cos(dir))));
 	}
 	
 
