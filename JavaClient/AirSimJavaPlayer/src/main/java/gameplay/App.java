@@ -1,12 +1,9 @@
 package gameplay;
 
-import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.net.UnknownHostException;
 
-import org.msgpack.type.Value;
-
-import gameplay.AirSimMessages.YawMode;
+import gameplay.AirSimStructures.*;
 import manualInput.XboxController;
 import visualiser.GlobalField;
 
@@ -55,19 +52,16 @@ public class App
 			setupPositions(e, p);
 			t = 0;			
 			while ((t < 10) || (!p.targetCaught())) {//&& (t < 100000)) {
-				System.out.println("t="+t+", Evader pos: "+e.getPos()+", Pursuer pos: "+p.getPos());
+				//System.out.println("t="+t+", Evader pos: "+e.getPos()+", Pursuer pos: "+p.getPos());
 				//e.steer(Math.sin(t/(16*Math.PI)));
 				if (xbox.gamepadSet()) {
-					e.steer((float) xbox.pollLeftJoyStick());
+					e.steer(xbox.pollLeftJoyStick());
 				} else {
 					e.steerInBox();
 				}
 				
 				e.move();
-				//e.updatePositionData();
-				
-				//System.out.println("Pursuer pos: "+p.getPos());
-				//System.out.println("Speed is perceived as " + p.estimateVelocity());
+
 				p.stalk();
 				
 				//p.linearPredictStalk();
@@ -82,7 +76,7 @@ public class App
 				vis.repaint();
 				
 				Thread.sleep(100);
-				t += 0.5;
+				t += 0.1;
 			}
 			
 			e.hover();

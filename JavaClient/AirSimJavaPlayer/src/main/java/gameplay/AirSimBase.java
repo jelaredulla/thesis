@@ -13,7 +13,7 @@ public class AirSimBase{
 
 }
 
-class AirSimClientBase extends AirSimMessages {
+class AirSimClientBase extends AirSimStructures {
 		protected Client client;
 		
 	    public AirSimClientBase(String ip, int port) throws UnknownHostException {
@@ -133,7 +133,7 @@ class MultirotorClient extends AirSimClientBase {
     }
     
     public Triplet getRollPitchYaw() {
-        return AirSimMessages.toEulerianAngle(this.getOrientation());
+        return AirSimStructures.toEulerianAngle(this.getOrientation());
     }
     
 //	    public CollisionInfo getCollisionInfo() {
@@ -180,7 +180,7 @@ class MultirotorClient extends AirSimClientBase {
     
     public Value moveByVelocityZ(Vector3r vel, Vector3r pos, float duration,
     		int drivetrain, YawMode yaw_mode) {    	
-    	Object[] args = new Object[] {vel.getX(), vel.getY(), pos.getZ(), (float) duration,
+    	Object[] args = new Object[] {vel.getX(), vel.getY(), pos.getZ(), duration,
     			drivetrain, yaw_mode.toMap()};
         return this.client.callApply("moveByVelocityZ", args);
     }    

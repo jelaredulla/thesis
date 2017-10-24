@@ -48,10 +48,15 @@ public class DronePlayer extends MultirotorClient {
 	
 	
 	public void move() {
-		//rotateToYaw((float) theta);
+		//rotateToYaw((float) Math.toDegrees(theta));
+		
+		//Triplet rpy = getRollPitchYaw();
+		//float yaw = rpy.get(2);
+		
+		//System.out.println("theta=" + theta + ", yaw=" + yaw);
 		
 		Vector3r vel = new Vector3r((float) (maxV*Math.cos(theta)), (float) (maxV*Math.sin(theta)), 0f);
-		moveByVelocityZ(vel, new Vector3r(0, 0, -5), dt, DrivetrainType.MaxDegreeOfFreedom,
+		moveByVelocityZ(vel, new Vector3r(0, 0, -5), dt, DrivetrainType.ForwardOnly,
 				new YawMode());
 //		
 //		try {
