@@ -32,12 +32,7 @@ public class DronePlayer extends MultirotorClient {
 	public Vector3r getPos() {
 		return position;
 	}
-	
-	// x, y swapped for plotting purposes ONLY!!!
-	public Point2D get2DPos() {
-		return new Point2D.Float(position.getY(), position.getX());
-	}
-	
+		
 	public double getTheta() {
 		return theta;
 	}
@@ -46,33 +41,13 @@ public class DronePlayer extends MultirotorClient {
 		return (float) maxV;
 	}
 	
-	
-	public void move() {
-		//rotateToYaw((float) Math.toDegrees(theta));
-		
-		//Triplet rpy = getRollPitchYaw();
-		//float yaw = rpy.get(2);
-		
-		//System.out.println("theta=" + theta + ", yaw=" + yaw);
-		
-		Vector3r vel = new Vector3r((float) (maxV*Math.cos(theta)), (float) (maxV*Math.sin(theta)), 0f);
-		moveByVelocityZ(vel, new Vector3r(0, 0, -5), dt, DrivetrainType.ForwardOnly,
-				new YawMode());
-//		
-//		try {
-//			Thread.sleep((long) (dt*1000));
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} 
-		
-		updatePositionData();
+	// x, y swapped for plotting purposes ONLY!!!
+	public Point2D get2DPos() {
+		return new Point2D.Float(position.getY(), position.getX());
 	}
 	
-	public void steer(double d) {
-		theta = d;
-		
-		System.out.println(theta);
+	public List<Point2D> getPath() {
+		return path;
 	}
 	
 	public Line2D getLastMovement() {
@@ -86,36 +61,5 @@ public class DronePlayer extends MultirotorClient {
 		
 		return new Line2D.Float(prev, current);
 	}
-	
-	public List<Point2D> getPath() {
-		return path;
-	}
-	
-	public void steerInBox() {
-		double x = position.getX();
-		double y = position.getY();
-		
-		double xDir = Math.signum(Math.cos(theta));
-		double yDir = Math.signum(Math.sin(theta));
-		
-		double dir = theta;
-		
-//		double boxR = 0.05;
-//		if (((x <= boxR) && (xDir < 0)) || ((x >= (1 - boxR)) && (xDir > 0))) {
-//			dir = -theta;
-//		} else if (((y <= boxR) && (yDir < 0)) || ((y >= (1 - boxR)) && (yDir > 0))) {
-//			dir = Math.PI - theta;
-//		}
-		double boxSide = 10;
-		if (((x <= -boxSide) && (xDir < 0)) || ((x >= boxSide) && (xDir > 0))) {
-			dir = Math.PI - theta;
-		} else if (((y <= -boxSide) && (yDir < 0)) || ((y >= boxSide) && (yDir > 0))) {
-			dir = -theta;
-		}
-		
-		steer((Math.atan2(Math.sin(dir), Math.cos(dir))));
-	}
-	
-
 }
 

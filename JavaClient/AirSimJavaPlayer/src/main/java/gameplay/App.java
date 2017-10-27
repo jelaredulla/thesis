@@ -24,11 +24,11 @@ public class App
 		double beta = Double.parseDouble(args[1]);
 		
 		double baseV = 2;
-		double baseR = 0.1;
+		double baseR = 2;
 		
 		//Player p = new Player(new Point2D.Double(0.5, 0), 0, 1, 1);
 		
-		GlobalField vis = new GlobalField(1000, 15, beta*baseR);
+		GlobalField vis = new GlobalField(1000, 50, 1);
 		
 		XboxController xbox = new XboxController();
 		
@@ -41,9 +41,9 @@ public class App
 //			Thread.sleep(100);
 //    	}
 		
-		DronePlayer e = new DronePlayer("", 41452, gamma*baseV);
+		AgileDronePlayer e = new AgileDronePlayer("", 41451, gamma*baseV);
 		// capture = beta*baseR instead of 0.5
-		DronePursuer p = new DronePursuer("", 41451, baseV, baseR, 1, e);
+		ChauffeurBangBangPursuer p = new ChauffeurBangBangPursuer("", 41452, baseV, baseR, 1, e);
 		
 		setupAPIControl(e, p);
 		double t;
@@ -57,7 +57,7 @@ public class App
 				if (xbox.gamepadSet()) {
 					e.steer(xbox.pollLeftJoyStick());
 				} else {
-					e.steerInBox();
+					e.steerInBox(30);
 				}
 				
 				e.move();
@@ -95,7 +95,7 @@ public class App
 
 	}
     
-    public static void setupAPIControl(DronePlayer e, DronePursuer p) throws InterruptedException {
+    public static void setupAPIControl(DronePlayer e, DronePlayer p) throws InterruptedException {
 		p.confirmConnection();
 		p.enableApiControl(true);			
 		
@@ -103,7 +103,7 @@ public class App
 		e.enableApiControl(true);
     }
     
-    public static void setupPositions(DronePlayer e, DronePursuer p) throws InterruptedException {
+    public static void setupPositions(AgileDronePlayer e, ChauffeurDronePlayer p) throws InterruptedException {
 		
     	if (e.getLandedState() == LandedState.Landed) {
     		e.armDisarm(true);
