@@ -20,36 +20,33 @@ public class App
 			System.exit(1);
 		}
 		
-		double gamma = Double.parseDouble(args[0]);
+		double gamma = 2;//Double.parseDouble(args[0]);
 		double beta = Double.parseDouble(args[1]);
 		
-		double baseV = 2;
-		double baseR = 2;
-		
-		//Player p = new Player(new Point2D.Double(0.5, 0), 0, 1, 1);
+		double baseV = 3;
+		double baseR = 2.1;
 		
 		GlobalField vis = new GlobalField(1000, 50, 1);
 		
 		XboxController xbox = new XboxController();
+
+		AgileDronePlayer e = new AgileDronePlayer("", 41452, gamma*baseV);
+//		// capture = beta*baseR instead of 0.5
+		ChauffeurBangBangPursuer p = new ChauffeurBangBangPursuer("", 41451, baseV, baseR, 1, e);
+//		
+//		ChauffeurGOTCEvader e = new ChauffeurGOTCEvader("", 41452, gamma*baseV, baseR, beta*baseR);
+//		// capture = beta*baseR instead of 0.5
+//		ChauffeurGOTCPursuer p = new ChauffeurGOTCPursuer("", 41451, baseV, baseR, beta*baseR, e);
+//		e.setHunter(p);
+	
 		
-//    	double t1 = 0;
-//    	double angle1;
-//    	while (t1 < 15) {
-//			angle1 = xbox.pollLeftJoyStick();
-//			System.out.println(angle1);
-//			t1 += 0.1;
-//			Thread.sleep(100);
-//    	}
-		
-		AgileDronePlayer e = new AgileDronePlayer("", 41451, gamma*baseV);
-		// capture = beta*baseR instead of 0.5
-		ChauffeurBangBangPursuer p = new ChauffeurBangBangPursuer("", 41452, baseV, baseR, 1, e);
 		
 		setupAPIControl(e, p);
 		double t;
 		while (true) {
 						
 			setupPositions(e, p);
+			vis.waitKey();
 			t = 0;			
 			while ((t < 10) || (!p.targetCaught())) {//&& (t < 100000)) {
 				//System.out.println("t="+t+", Evader pos: "+e.getPos()+", Pursuer pos: "+p.getPos());
@@ -59,11 +56,11 @@ public class App
 				} else {
 					e.steerInBox(30);
 				}
-				
 				e.move();
-
-				p.stalk();
 				
+				
+//				e.evade();
+				p.pursue();
 				//p.linearPredictStalk();
 				
 				vis.setPursuerState(p.get2DPos(), p.getTheta());
@@ -103,7 +100,7 @@ public class App
 		e.enableApiControl(true);
     }
     
-    public static void setupPositions(AgileDronePlayer e, ChauffeurDronePlayer p) throws InterruptedException {
+    public static void setupPositions(DronePlayer e, DronePlayer p) throws InterruptedException {
 		
     	if (e.getLandedState() == LandedState.Landed) {
     		e.armDisarm(true);
@@ -113,7 +110,7 @@ public class App
     	//e.goHome();
 
 		e.moveToZ(-5, 1, 5);
-		e.steer((3*Math.PI)/4);
+		//e.steer((3*Math.PI)/4);
 		e.moveByVelocityZ(new Vector3r(0, -1, 0), new Vector3r(0,  0, -5), 8);
 		e.updatePositionData();
 		System.out.println(e.getPos());		
@@ -128,78 +125,5 @@ public class App
 		p.moveToZ(-5, 1, 5);
 		p.updatePositionData();
 		System.out.println(p.getPos());
-    }
-    
-    
-    public static void oldMain() throws InterruptedException, UnknownHostException {
-    	GlobalField g = new GlobalField(50, 1, 0.5);
-    	XboxController con = new XboxController();
-//    	double t1 = 0;
-//    	double angle1;
-//    	while (t1 < 15) {
-//			angle1 = con.pollLeftJoyStick();
-//			System.out.println(angle1);
-//			t1 += 0.1;
-//			Thread.sleep(100);
-//    	}
-    	
-        DronePlayer pursuer = new DronePlayer("", 41451, 1);
-		System.out.println( "Hello World!" );
-		
-		pursuer.confirmConnection();
-		pursuer.enableApiControl(true);
-		boolean respP = pursuer.isApiControlEnabled();
-		System.out.println(respP);
-		
-		
-		
-		DronePlayer evader = new DronePlayer("", 41452, 1);
-		evader.confirmConnection();
-		evader.enableApiControl(true);
-		boolean respE = evader.isApiControlEnabled();
-		System.out.println(respE);
-		
-		evader.armDisarm(true);
-		evader.takeoff(20);
-		
-		evader.moveToZ(-7, 1);
-		evader.moveByVelocityZ(new Vector3r(0, 1, 0), new Vector3r(0,  0, -7), 15);
-				
-	
-		
-		try {
-			
-			
-			pursuer.armDisarm(true);
-			pursuer.takeoff(20);
-			
-			double t = 0;
-			
-			double angle;
-			while (t < 300) {
-				angle = con.pollLeftJoyStick();
-				//System.out.println(angle);
-				Vector3r eVel = new Vector3r((float) Math.sin(angle), (float) Math.cos(angle), 0f);
-				//System.out.println("eVel = "+eVel.toString());
-				double poseAngle = -angle + Math.PI/2;
-				float pose = (float) Math.toDegrees(Math.atan2(Math.sin(poseAngle), Math.cos(poseAngle)));
-				System.out.println(pose);
-				pursuer.rotateToYaw(pose);
-				pursuer.moveByVelocityZ(eVel, new Vector3r(0,  0, -7), 20, DrivetrainType.ForwardOnly, new YawMode(true, 0f));
-//				
-//				Vector3r ePos = evader.getPosition();
-//				System.out.println(ePos);
-				
-				//evader.moveByVelocityZ(new Vector3r(0, 1, 0), new Vector3r(0,  0, -7), 20);
-				
-				Thread.sleep(100);
-				t += 0.1;
-			}
-			
-		} catch (Exception e) {
-			System.out.println(e.getStackTrace());
-		}
-		
-
     }
 }

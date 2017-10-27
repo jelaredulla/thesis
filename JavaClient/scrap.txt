@@ -1,0 +1,31 @@
+	
+	public void linearPredictStalk() {
+		Vector3r ePos = target.getPos();
+		
+		// differences in x, y coords in global frame
+		double xDiff = (ePos.getX() - position.getX());
+		double yDiff = (ePos.getY() - position.getY());
+		
+		double eTheta = target.getTheta();
+		double v_e = estimateVelocity(); 
+		double a_s = v_e*Math.sin(eTheta);
+		double a_c = v_e*Math.cos(eTheta);
+		
+		double K = (-a_s*yDiff + a_c*xDiff) / maxV;
+		double c = Math.sqrt(xDiff*xDiff + yDiff*yDiff);
+		double d = Math.atan2(-yDiff, xDiff);
+		
+		double desiredTheta = Math.acos(K/c) + d;
+		desiredTheta = Math.atan2(Math.sin(desiredTheta), Math.cos(desiredTheta));
+		
+		double phi = Math.signum(desiredTheta - theta);
+		double dtheta = phi*(maxV/minR);
+		
+		steer(dtheta);
+		super.move();
+	}
+	
+	public double estimateVelocity() {
+		Line2D lastMove = target.getLastMovement();
+		return lastMove.getP1().distance(lastMove.getP2()) / dt;
+	}
