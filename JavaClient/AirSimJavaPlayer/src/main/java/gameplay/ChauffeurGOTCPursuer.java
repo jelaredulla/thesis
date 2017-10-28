@@ -42,6 +42,9 @@ public class ChauffeurGOTCPursuer extends ChauffeurDronePlayer implements Pursue
 		// control variable, which is effectively turning radius
 		double phi = -Math.signum(eVel*Math.sin(relativeTheta) - maxV);
 
+		System.out.println(relativeTheta);
+		System.out.println(phi);
+		
 		steer(phi);
 		move();		
 	}

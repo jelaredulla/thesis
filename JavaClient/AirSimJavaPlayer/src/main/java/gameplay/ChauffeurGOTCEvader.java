@@ -49,6 +49,9 @@ public class ChauffeurGOTCEvader extends ChauffeurDronePlayer implements Evader 
 			// control variable, which is effectively turning radius
 			double phi = -Math.signum(maxV - pVel*Math.sin(relativeTheta));
 
+			System.out.println(relativeTheta);
+			System.out.println(phi);
+			
 			steer(phi);
 			move();		
 		}
