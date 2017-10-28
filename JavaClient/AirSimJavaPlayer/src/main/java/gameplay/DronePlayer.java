@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class DronePlayer extends MultirotorClient {
+public class DronePlayer extends MultirotorClient implements Pursuer, Evader {
 	public final static float dt = 20f;
 	protected Vector3r position; // (x, y, z) position in fixed global frame
 	protected double theta; // orientation in fixed global frame, wrt x-axis
@@ -60,6 +60,46 @@ public class DronePlayer extends MultirotorClient {
 		Point2D current = path.get(size - 1);
 		
 		return new Line2D.Float(prev, current);
+	}
+	
+	public void steer(double control) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public void move() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void setHunter(DronePlayer e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public boolean isCaught() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public void evade() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void setTarget(DronePlayer e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public boolean targetCaught() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public void pursue() {
+		// TODO Auto-generated method stub
+		
 	}
 }
 
