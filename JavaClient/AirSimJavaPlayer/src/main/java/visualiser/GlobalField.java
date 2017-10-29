@@ -1,14 +1,23 @@
 package visualiser;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+
+import gameplay.DronePlayer;
+import gameplay.AirSimStructures.Vector3r;
+
 import java.awt.Graphics;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.awt.geom.Line2D;
 import java.util.*;
+import java.util.logging.Logger;
 
 public class GlobalField extends JPanel implements KeyListener {
 	
@@ -27,8 +36,7 @@ public class GlobalField extends JPanel implements KeyListener {
 	private Point2D ePos = null;
 	private double eTheta;
 	
-	private HashMap<String, List<Line2D>> pursuerPaths = new HashMap<String, List<Line2D>>();
-	//private List<Line2D> pursuerPath = new ArrayList<Line2D>();
+	private List<Line2D> pursuerPath = new ArrayList<Line2D>();
 	private List<Line2D> evaderPath = new ArrayList<Line2D>();
 	
 	private JFrame frame;
@@ -52,6 +60,18 @@ public class GlobalField extends JPanel implements KeyListener {
 		frame.setVisible(true);
 	}
 	
+	public void saveImage(String filename) {
+		BufferedImage image = new BufferedImage(panelWidth, panelHeight, BufferedImage.TYPE_INT_ARGB);
+		Graphics g = image.getGraphics();
+		paint(g);
+		
+		try {
+			ImageIO.write(image, "png", new File(filename));
+		} catch (IOException ex) {
+			System.out.println("Error saving image '" + filename + ".png'");
+		}
+	}
+	
 	public int scaleWorldToPanelWidth(double value) {
 		return (int) ((panelWidth*(value+boundary))/(2*boundary));
 	}
@@ -60,21 +80,48 @@ public class GlobalField extends JPanel implements KeyListener {
 		return (int) ((panelHeight*(value+boundary))/(2*boundary));
 	}
 	
+	public void resetBoundaryForMax() {
+		double maxBoundary = boundary;
+		
+		double x, y;
+		Point2D endpoint;
+		for (Line2D evaderSegment : evaderPath) {
+			endpoint = evaderSegment.getP2();
+			
+			x = Math.abs(endpoint.getX());
+			y = Math.abs(endpoint.getY());
+			
+			if (x > maxBoundary) {
+				maxBoundary = x;
+			}
+			
+			if (y > maxBoundary) {
+				maxBoundary = y;
+			}
+		}
+		
+		boundary = maxBoundary;
+	}
+	
+	public void drawRelativePos(List<Point2D> input) {
+		GlobalField relativeVis = new GlobalField(panelWidth, 5, captureL);
+		relativeVis.setPursuerState(new Point2D.Float(0, 0),  0);
+		
+		relativeVis.setEvaderPath(input);
+		relativeVis.resetBoundaryForMax();
+		relativeVis.repaint();
+	}
+	
+	
 	/**
 	 * Sets pursuer segments to draw
 	 * @param input List of Point2D
 	 */
-	public void setPursuerPath(List<Point2D> input, String name) {
-		if (!pursuerPaths.containsKey(name)) {
-			pursuerPaths.put(name, new ArrayList<Line2D>());
-		}
-		
-		List<Line2D> path = pursuerPaths.get(name);
-		
-		clearPursuer(name);
+	public void setPursuerPath(List<Point2D> input) {		
+		clearPursuer();
 		
 		for (int i = 0; i < input.size() - 1; i++) {
-			path.add(new Line2D.Float(input.get(i), input.get(i + 1)));
+			pursuerPath.add(new Line2D.Float(input.get(i), input.get(i + 1)));
 		}
 	}
 	
@@ -93,12 +140,8 @@ public class GlobalField extends JPanel implements KeyListener {
 	 * Adds pursuer segment to draw, coordinates between 0 and 1
 	 * @param input Line2D
 	 */
-	public void addPursuerSegment(Line2D input, String name) {
-		if (!pursuerPaths.containsKey(name)) {
-			pursuerPaths.put(name, new ArrayList<Line2D>());
-		}
-		
-		pursuerPaths.get(name).add(input);
+	public void addPursuerSegment(Line2D input) {
+		pursuerPath.add(input);
 	}
 	
 	/**
@@ -121,17 +164,12 @@ public class GlobalField extends JPanel implements KeyListener {
 
 
 	public void clearAll() {
-		for (String name : pursuerPaths.keySet()) {
-			clearPursuer(name);
-		}
-		
+		clearPursuer();
 		clearEvader();
-		//pPos = null;
-		//ePos = null;
 	}
 	
-	public void clearPursuer(String name) {
-		pursuerPaths.get(name).clear();
+	public void clearPursuer() {
+		pursuerPath.clear();
 	}
 
 	public void clearEvader() {
@@ -173,27 +211,25 @@ public class GlobalField extends JPanel implements KeyListener {
 			g.drawLine(x1, panelHeight - y1, x2, panelHeight - y2);
 		}
 		
-		for (List<Line2D> path : pursuerPaths.values()) {
-			// Draw pursuer path
-			for (Line2D l : path) {
-				x1 = scaleWorldToPanelWidth(l.getX1());
-				y1 = scaleWorldToPanelHeight(l.getY1());
-				x2 = scaleWorldToPanelWidth(l.getX2());
-				y2 = scaleWorldToPanelHeight(l.getY2());
-				g.setColor(Color.red);
-				g.drawLine(x1, panelHeight - y1, x2, panelHeight - y2);
-			}
-			
-			// Draw pursuer capture radius
-			if (!path.isEmpty()) {
-				Line2D lastMovement = path.get(path.size() - 1);
-				x2 = scaleWorldToPanelWidth(lastMovement.getX2());
-				y2 = scaleWorldToPanelHeight(lastMovement.getY2());
-				int rx = (int) ((captureL/(2*boundary)) * panelWidth); 
-				int ry = (int) ((captureL/(2*boundary)) * panelHeight); 
-				g.setColor(Color.orange);
-				g.drawOval(x2 - rx, panelHeight - (y2 + ry), 2*rx, 2*ry);
-			}
+		// Draw pursuer path
+		for (Line2D l : pursuerPath) {
+			x1 = scaleWorldToPanelWidth(l.getX1());
+			y1 = scaleWorldToPanelHeight(l.getY1());
+			x2 = scaleWorldToPanelWidth(l.getX2());
+			y2 = scaleWorldToPanelHeight(l.getY2());
+			g.setColor(Color.red);
+			g.drawLine(x1, panelHeight - y1, x2, panelHeight - y2);
+		}
+		
+		// Draw pursuer capture radius
+		if (!pursuerPath.isEmpty()) {
+			Line2D lastMovement = pursuerPath.get(pursuerPath.size() - 1);
+			x2 = scaleWorldToPanelWidth(lastMovement.getX2());
+			y2 = scaleWorldToPanelHeight(lastMovement.getY2());
+			int rx = (int) ((captureL/(2*boundary)) * panelWidth); 
+			int ry = (int) ((captureL/(2*boundary)) * panelHeight); 
+			g.setColor(Color.orange);
+			g.drawOval(x2 - rx, panelHeight - (y2 + ry), 2*rx, 2*ry);
 		}
 			
 		if (pPos != null) {

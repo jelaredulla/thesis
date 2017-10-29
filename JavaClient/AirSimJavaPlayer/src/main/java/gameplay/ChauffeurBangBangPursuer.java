@@ -1,15 +1,24 @@
 package gameplay;
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
+import java.awt.geom.Point2D;
+import java.awt.geom.Line2D;
 
 public class ChauffeurBangBangPursuer extends ChauffeurDronePlayer implements Pursuer {
 	private double captureL; // capture radius
 	private DronePlayer target;
 	
+	private Point2D relativePos;
+	private List<Point2D> relativeTrajectory;
+	
 	ChauffeurBangBangPursuer(String ip, int port, double v, double r, double l, DronePlayer e) throws UnknownHostException {
 		super(ip, port, v, r);
 		
 		captureL = l;
+		relativeTrajectory = new ArrayList<Point2D>();
+		relativePos = new Point2D.Double(Simulator.eInitPos.getX(), Simulator.eInitPos.getY());
 		setTarget(e);
 	}
 	
@@ -21,16 +30,23 @@ public class ChauffeurBangBangPursuer extends ChauffeurDronePlayer implements Pu
 		return (position.distance(target.getPos()) <= captureL);
 	}
 	
-	public void pursue() {
-		Vector3r ePos = target.getPos();
-				
-		// differences in x, y coords in global frame
-		double xDiff = (ePos.getX() - position.getX());
-		double yDiff = (ePos.getY() - position.getY());
+	@Override
+	public void updatePositionData() {
+		super.updatePositionData();
 		
-		// x, y coords of evader wrt pursuer
-		double x = xDiff*Math.cos(theta) - yDiff*Math.sin(theta);
-		double y = -xDiff*Math.sin(theta) + yDiff*Math.cos(theta);
+		relativeTrajectory.add(relativePos);
+	}
+	
+	public List<Point2D> getRelativeTrajectory() {
+		System.out.println(relativeTrajectory.size());
+		return relativeTrajectory;
+	}
+	
+	public void pursue() {
+		relativePos = getRelativePos(target);
+				
+		double x = relativePos.getX();
+		double y = relativePos.getY();
 		
 		// control variable, which is effectively turning radius
 		double phi;

@@ -6,6 +6,8 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
+import gameplay.AirSimStructures.Vector3r;
+
 
 public class DronePlayer extends MultirotorClient implements Pursuer, Evader {
 	public final static float dt = 20f;
@@ -31,6 +33,20 @@ public class DronePlayer extends MultirotorClient implements Pursuer, Evader {
 	
 	public Vector3r getPos() {
 		return position;
+	}
+	
+	public Point2D getRelativePos(DronePlayer other) {
+		Vector3r ePos = other.getPos();
+		
+		// differences in x, y coords in global frame
+		double xDiff = (ePos.getX() - position.getX());
+		double yDiff = (ePos.getY() - position.getY());
+		
+		// x, y coords of evader wrt pursuer
+		double x = xDiff*Math.cos(theta) - yDiff*Math.sin(theta);
+		double y = -xDiff*Math.sin(theta) + yDiff*Math.cos(theta);
+		
+		return new Point2D.Double(x, y);
 	}
 		
 	public double getTheta() {

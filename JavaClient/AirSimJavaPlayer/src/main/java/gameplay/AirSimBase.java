@@ -237,15 +237,15 @@ class MultirotorClient extends AirSimClientBase {
     		float max_wait_seconds, int drivetrain, YawMode yaw_mode,
     		float lookahead, float adaptive_lookahead) {
     	Object[] args = new Object[] {pos.getX(), pos.getY(), pos.getZ(), velocity, max_wait_seconds,
-        		yaw_mode.toMap(), lookahead, adaptive_lookahead};
+        		drivetrain, yaw_mode.toMap(), lookahead, adaptive_lookahead};
     	
     	return this.client.callApply("moveToPosition", args);
 
     }
     
     public Value moveToPosition(Vector3r pos, float velocity) {
-        float max_wait_seconds = 60;
-        int drivetrain = DrivetrainType.ForwardOnly;
+        float max_wait_seconds = 20;
+        int drivetrain = DrivetrainType.MaxDegreeOfFreedom;
     	YawMode yaw_mode = new YawMode();    	
     	float lookahead = -1;
     	float adaptive_lookahead = 1;

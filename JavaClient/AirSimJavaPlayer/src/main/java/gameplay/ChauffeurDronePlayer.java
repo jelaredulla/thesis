@@ -18,6 +18,10 @@ public class ChauffeurDronePlayer extends DronePlayer {
 		minR = r;
 	}
 	
+	public double getMinR() {
+		return minR;
+	}
+	
 	public void steer(double phi) {
 		double dtheta = phi*(maxV/minR);
 		theta += dtheta*deltaT;
@@ -25,8 +29,8 @@ public class ChauffeurDronePlayer extends DronePlayer {
 	
 	public void move() {
 		Vector3r vel = new Vector3r((float) (maxV*Math.cos(theta)), (float) (maxV*Math.sin(theta)), 0f);
-		moveByVelocityZ(vel, new Vector3r(0, 0, -5), dt, DrivetrainType.MaxDegreeOfFreedom,
-				new YawMode(false, (float) theta));
+		moveByVelocityZ(vel, new Vector3r(0, 0, Simulator.planeHeight), dt, DrivetrainType.MaxDegreeOfFreedom,
+				new YawMode());
 		
 //		moveByAngle(-0.1f, 0f, -5f, (float) theta, dt);
 
