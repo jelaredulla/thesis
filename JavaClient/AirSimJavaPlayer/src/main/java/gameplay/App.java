@@ -32,7 +32,7 @@ public class App
 
 		AgileDronePlayer e = new AgileDronePlayer("", 41452, gamma*baseV);
 //		// capture = beta*baseR instead of 0.5
-		ChauffeurBangBangPursuer p = new ChauffeurBangBangPursuer("", 41451, baseV, baseR, 1, e);
+		ChauffeurPursuer p = new ChauffeurPursuer("", 41451, baseV, baseR, 1, e);
 //		
 //		ChauffeurGOTCEvader e = new ChauffeurGOTCEvader("", 41452, gamma*baseV, baseR, beta*baseR);
 //		// capture = beta*baseR instead of 0.5

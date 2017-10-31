@@ -1,5 +1,6 @@
 package gameplay;
 
+import java.awt.geom.Point2D;
 import java.net.UnknownHostException;
 
 import gameplay.AirSimStructures.Vector3r;
@@ -30,8 +31,26 @@ public class ChauffeurGOTCEvader extends ChauffeurDronePlayer implements Evader 
 		public boolean isCaught() {
 			return (position.distance(hunter.getPos()) <= captureL);
 		}
-
+		
+		public Point2D getCurrentRelativePos() {
+			return getRelativePos(hunter.get2DPos());
+		}
+		
 		public void evade() {
+			Point2D relativePos = getCurrentRelativePos();
+			double x = relativePos.getX();
+			double y = relativePos.getY();
+			
+			// relative angle
+			double relativeTheta = Math.atan2(y, x) + Math.PI;
+						
+			// control variable, which is effectively turning radius
+			double phi = -Math.signum(maxV - pVel*Math.sin(relativeTheta));
+			steer(phi);
+			super.move();
+		}
+
+		public void evadeOld() {
 			Vector3r pPos = hunter.getPos();
 			double pTheta = hunter.getTheta();
 			

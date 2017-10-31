@@ -21,7 +21,7 @@ public class Simulator {
     public static void main(String[] args)
     {
     	try {
-    		Simulator sim = new Simulator(0);
+    		Simulator sim = new Simulator(5);
     		sim.run();
     	} catch (Exception e) {
     		System.out.println(e.getMessage());
@@ -32,10 +32,10 @@ public class Simulator {
 	}
     
     public Simulator(int type) throws UnknownHostException {
-		double gamma = 0.9;
-		double beta = 0.2;
+		double gamma = 0.8;
+		double beta = 0.4;
 		double baseV = 3;
-		double baseR = 10;
+		double baseR = 4;
 		captureL = beta * baseR;
 		
 		String ipAddress = "127.0.0.1"; // localhost
@@ -49,33 +49,53 @@ public class Simulator {
 		
 		switch(type) {
 		case 0:
-			evader = new AgileDronePlayer(ipAddress, ePort, eMaxV);
-			pursuer = new ChauffeurBangBangPursuer(ipAddress, pPort, pMaxV, baseR, captureL, evader);
+			// Pedestrian Tag
+			evader = new AgileEvader(ipAddress, ePort, eMaxV, captureL);
+			pursuer = new AgilePursuer(ipAddress, pPort, pMaxV, captureL, evader);
 			break;
 		case 1:
-			evader = new AgileBangBangDroneEvader(ipAddress, ePort, eMaxV, captureL);
-			pursuer = new ChauffeurBangBangPursuer(ipAddress, pPort, pMaxV, baseR, captureL, evader);
-			evader.setHunter(pursuer);
+			// Homicidal Chauffeur
+			evader = new AgileEvader(ipAddress, ePort, eMaxV, captureL);
+			pursuer = new ChauffeurPursuer(ipAddress, pPort, pMaxV, baseR, captureL, evader);
 			break;
 		case 2:
+			// Suicidal Pedestrian
+			evader = new ChauffeurEvader(ipAddress, ePort, eMaxV, baseR, captureL);
+			pursuer = new AgilePursuer(ipAddress, pPort, pMaxV, captureL, evader);
+			break;
+		case 3:
+			// Game of Two Cars, naively combined
+			evader = new ChauffeurEvader(ipAddress, ePort, eMaxV, baseR, captureL);
+			pursuer = new ChauffeurPursuer(ipAddress, pPort, pMaxV, baseR, captureL, evader);
+			break;
+		case 4:
+			// Game of Two Cars
 			evader = new ChauffeurGOTCEvader(ipAddress, ePort, eMaxV, baseR, captureL);
 			pursuer = new ChauffeurGOTCPursuer(ipAddress, pPort, pMaxV, baseR, captureL, evader);
-			evader.setHunter(pursuer);
+			break;
+		case 5:
+			// Homicidal Chauffeur, xBox controlled
+			evader = new AgileDronePlayer(ipAddress, ePort, eMaxV);
+			pursuer = new ChauffeurPursuer(ipAddress, pPort, pMaxV, baseR, captureL, evader);
 			break;
 		}
+		
+		evader.setHunter(pursuer);
     }
     
     public void run() throws InterruptedException {
-    	double r_init = 2*captureL;
+    	int rNum = 5;
+    	double r_init = rNum*captureL;
     	int n = 1;
     	double theta_init = n * Math.PI/4; 
     	eInitPos = new Vector3r((float) (r_init*Math.cos(theta_init)), (float) (r_init*Math.sin(theta_init)), planeHeight);
+    	evader.setTheta(0);
+    	String folder = "";
+    	String filename = folder+String.format("hCManual_r%d.png", rNum);
     	
-    	String filename = String.format("globalView_r%.4f_n%d.png", r_init, n);
     	
-    	
-    	GlobalField vis = new GlobalField(1500, 50, captureL);
-    	RelativeField relativeVis = new RelativeField(1500, 50, captureL);
+    	GlobalField vis = new GlobalField(1500, 10, captureL);
+    	RelativeField relativeVis = new RelativeField(1500, 10, captureL);
 		relativeVis.setPursuerState(new Point2D.Float(0, 0),  0);
 		XboxController xbox = new XboxController();
 		
@@ -85,9 +105,16 @@ public class Simulator {
 		setupPositions(eInitPos);
 		
 		System.out.println("Press any key to begin the chase:");
-		relativeVis.waitKey();
+		vis.waitKey();
+		
+		evader.updatePositionData();
+		pursuer.updatePositionData();
+		System.out.println("Evader's initial position: " + evader.getPos());
+		System.out.println("Pursuer's initial position: " + pursuer.getPos());
+		
+		double start = System.currentTimeMillis();
 		t = 0;			
-		while (((t < 10) || (!pursuer.targetCaught() && !evader.isCaught())) && (t < 180)) {
+		while (!pursuer.targetCaught() && !evader.isCaught() && (t < 180)) {
 			if (xbox.gamepadSet()) {
 				evader.steer(xbox.pollLeftJoyStick());
 				evader.move();
@@ -97,16 +124,15 @@ public class Simulator {
 			
 			pursuer.pursue();
 			
-			ChauffeurBangBangPursuer pBang= (ChauffeurBangBangPursuer) pursuer;
-			
 			vis.setPursuerState(pursuer.get2DPos(), pursuer.getTheta());
 			vis.setEvaderState(evader.get2DPos(), evader.getTheta());
-			relativeVis.setEvaderState(pBang.getCurrentRelativePos(), evader.getTheta() - pursuer.getTheta());
+			relativeVis.setEvaderState(pursuer.getCurrentRelativePos(), evader.getTheta() - pursuer.getTheta());
 			
 			vis.addPursuerSegment(pursuer.getLastMovement());
 			vis.addEvaderSegment(evader.getLastMovement());
-			relativeVis.setEvaderPath(pBang.getRelativeTrajectory());
+			relativeVis.setEvaderPath(pursuer.getRelativeTrajectory());
 
+			vis.resetBoundaryForMax();
 			vis.repaint();
 			relativeVis.repaint();
 
@@ -114,6 +140,8 @@ public class Simulator {
 			t += 0.1;
 		}
 		
+		double totalTime = (System.currentTimeMillis() - start)/1000;
+		System.out.println("Time is: "+totalTime+" seconds");
 		System.out.println("Time is: "+t+" seconds");
 		
 		evader.hover();
@@ -149,10 +177,7 @@ public class Simulator {
     
     public void setupPositions(Vector3r evaderInitPos) throws InterruptedException {
     	setupPosition(evader, evaderInitPos);
-		System.out.println("Evader's intial position: " + evader.getPos());	
-    	
 		setupPosition(pursuer, new Vector3r(0, 0, planeHeight));
-		System.out.println("Pursuer's intial position: " + pursuer.getPos());
     }
     
     private void setupPosition(DronePlayer drone, Vector3r initPos) throws InterruptedException {

@@ -100,6 +100,21 @@ public class GlobalField extends JPanel implements KeyListener {
 			}
 		}
 		
+		for (Line2D pursuerSegment : pursuerPath) {
+			endpoint = pursuerSegment.getP2();
+			
+			x = Math.abs(endpoint.getX());
+			y = Math.abs(endpoint.getY());
+			
+			if (x > maxBoundary) {
+				maxBoundary = x;
+			}
+			
+			if (y > maxBoundary) {
+				maxBoundary = y;
+			}
+		}
+		
 		boundary = maxBoundary;
 	}
 		

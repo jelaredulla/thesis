@@ -244,6 +244,7 @@ class MultirotorClient extends AirSimClientBase {
     }
     
     public Value moveToPosition(Vector3r pos, float velocity) {
+    	System.out.println("Sent to: "+pos);
         float max_wait_seconds = 20;
         int drivetrain = DrivetrainType.MaxDegreeOfFreedom;
     	YawMode yaw_mode = new YawMode();    	

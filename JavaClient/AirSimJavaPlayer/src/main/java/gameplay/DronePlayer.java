@@ -73,6 +73,10 @@ public class DronePlayer extends MultirotorClient implements Pursuer, Evader {
 		return theta;
 	}
 	
+	public void setTheta(double initAngle) {
+		theta = initAngle;
+	}
+	
 	public float getMaxV() {
 		return (float) maxV;
 	}
@@ -100,13 +104,11 @@ public class DronePlayer extends MultirotorClient implements Pursuer, Evader {
 	}
 	
 	public void steer(double control) {
-		// TODO Auto-generated method stub
-		
+		throw new UnsupportedOperationException();
 	}
 	
 	public void move() {
-		// TODO Auto-generated method stub
-		
+		throw new UnsupportedOperationException();
 	}
 
 	public void setHunter(DronePlayer e) {
@@ -120,23 +122,28 @@ public class DronePlayer extends MultirotorClient implements Pursuer, Evader {
 	}
 
 	public void evade() {
-		// TODO Auto-generated method stub
-		
+		throw new UnsupportedOperationException();
 	}
 
 	public void setTarget(DronePlayer e) {
-		// TODO Auto-generated method stub
-		
+		throw new UnsupportedOperationException();
 	}
 
 	public boolean targetCaught() {
-		// TODO Auto-generated method stub
-		return false;
+		throw new UnsupportedOperationException();
 	}
 
 	public void pursue() {
-		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException();
 		
+	}
+	
+	public Point2D getCurrentRelativePos() {
+		throw new UnsupportedOperationException();
+	}
+	
+	public List<Point2D> getRelativeTrajectory() {
+		throw new UnsupportedOperationException();
 	}
 }
 

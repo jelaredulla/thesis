@@ -3,7 +3,7 @@ package gameplay;
 import java.net.UnknownHostException;
 
 public class ChauffeurDronePlayer extends DronePlayer {
-	final static double deltaT = 0.45; // time step for angle change
+	final static double deltaT = 0.08; // time step for angle change
 	protected double minR; // minimum turning radius
 	
 	ChauffeurDronePlayer(String ip, int port, double v, double r) throws UnknownHostException {
