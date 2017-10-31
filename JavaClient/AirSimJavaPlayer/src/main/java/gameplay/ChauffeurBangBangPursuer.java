@@ -3,8 +3,8 @@ package gameplay;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import java.awt.geom.Point2D;
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 
 public class ChauffeurBangBangPursuer extends ChauffeurDronePlayer implements Pursuer {
 	private double captureL; // capture radius
@@ -18,7 +18,7 @@ public class ChauffeurBangBangPursuer extends ChauffeurDronePlayer implements Pu
 		
 		captureL = l;
 		relativeTrajectory = new ArrayList<Point2D>();
-		relativePos = new Point2D.Double(Simulator.eInitPos.getX(), Simulator.eInitPos.getY());
+		
 		setTarget(e);
 	}
 	
@@ -27,24 +27,33 @@ public class ChauffeurBangBangPursuer extends ChauffeurDronePlayer implements Pu
 	}
 	
 	public boolean targetCaught() {
-		return (position.distance(target.getPos()) <= captureL);
+		return (Math.hypot(relativePos.getX(), relativePos.getY()) <= captureL);
 	}
 	
 	@Override
 	public void updatePositionData() {
 		super.updatePositionData();
-		
-		relativeTrajectory.add(relativePos);
+		relativeTrajectory = getRelativePath(target);
 	}
 	
 	public List<Point2D> getRelativeTrajectory() {
-		System.out.println(relativeTrajectory.size());
 		return relativeTrajectory;
 	}
 	
+	public Point2D getCurrentRelativePos() {
+		return relativePos;
+	}
+		
 	public void pursue() {
-		relativePos = getRelativePos(target);
-				
+		updatePositionData();
+		
+		if (relativeTrajectory.isEmpty()) {
+			return;
+		}
+		
+		relativePos = relativeTrajectory.get(relativeTrajectory.size() - 1);
+//		relativePos = getRelativePos(target.get2DPos());
+		
 		double x = relativePos.getX();
 		double y = relativePos.getY();
 		

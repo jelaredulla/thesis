@@ -1,15 +1,14 @@
 package gameplay;
 
-import java.awt.event.WindowEvent;
-import java.io.IOException;
+import java.awt.geom.Point2D;
 import java.net.UnknownHostException;
 
 import gameplay.AirSimStructures.*;
 import manualInput.XboxController;
-import visualiser.GlobalField;
+import visualiser.*;
 
 public class Simulator {
-	public final static float planeHeight = -5f;
+	public final static float planeHeight = -6f;
 	public final static float resetHeight = -7f;
 	public final static float setupVelocity = 3f;
 	public final static float setupWaitTime = 3f;
@@ -22,7 +21,7 @@ public class Simulator {
     public static void main(String[] args)
     {
     	try {
-    		Simulator sim = new Simulator(1);
+    		Simulator sim = new Simulator(0);
     		sim.run();
     	} catch (Exception e) {
     		System.out.println(e.getMessage());
@@ -33,7 +32,7 @@ public class Simulator {
 	}
     
     public Simulator(int type) throws UnknownHostException {
-		double gamma = 0.7;
+		double gamma = 0.9;
 		double beta = 0.2;
 		double baseV = 3;
 		double baseR = 10;
@@ -68,7 +67,7 @@ public class Simulator {
     
     public void run() throws InterruptedException {
     	double r_init = 2*captureL;
-    	int n = 3;
+    	int n = 1;
     	double theta_init = n * Math.PI/4; 
     	eInitPos = new Vector3r((float) (r_init*Math.cos(theta_init)), (float) (r_init*Math.sin(theta_init)), planeHeight);
     	
@@ -76,7 +75,8 @@ public class Simulator {
     	
     	
     	GlobalField vis = new GlobalField(1500, 50, captureL);
-		
+    	RelativeField relativeVis = new RelativeField(1500, 50, captureL);
+		relativeVis.setPursuerState(new Point2D.Float(0, 0),  0);
 		XboxController xbox = new XboxController();
 		
 		setupAPIControl();
@@ -85,11 +85,9 @@ public class Simulator {
 		setupPositions(eInitPos);
 		
 		System.out.println("Press any key to begin the chase:");
-		vis.waitKey();
+		relativeVis.waitKey();
 		t = 0;			
-		while (((t < 10) || (!pursuer.targetCaught()) || (!evader.isCaught())) && (t < 60)) {
-			//System.out.println("t="+t+", Evader pos: "+e.getPos()+", Pursuer pos: "+p.getPos());
-			//e.steer(Math.sin(t/(16*Math.PI)));
+		while (((t < 10) || (!pursuer.targetCaught() && !evader.isCaught())) && (t < 180)) {
 			if (xbox.gamepadSet()) {
 				evader.steer(xbox.pollLeftJoyStick());
 				evader.move();
@@ -99,17 +97,24 @@ public class Simulator {
 			
 			pursuer.pursue();
 			
+			ChauffeurBangBangPursuer pBang= (ChauffeurBangBangPursuer) pursuer;
+			
 			vis.setPursuerState(pursuer.get2DPos(), pursuer.getTheta());
 			vis.setEvaderState(evader.get2DPos(), evader.getTheta());
+			relativeVis.setEvaderState(pBang.getCurrentRelativePos(), evader.getTheta() - pursuer.getTheta());
 			
 			vis.addPursuerSegment(pursuer.getLastMovement());
 			vis.addEvaderSegment(evader.getLastMovement());
+			relativeVis.setEvaderPath(pBang.getRelativeTrajectory());
 
 			vis.repaint();
+			relativeVis.repaint();
 
 			Thread.sleep(100);
 			t += 0.1;
 		}
+		
+		System.out.println("Time is: "+t+" seconds");
 		
 		evader.hover();
 		pursuer.hover();			
@@ -120,10 +125,13 @@ public class Simulator {
 		vis.resetBoundaryForMax();
 		vis.repaint();
 		
-		if (pursuer instanceof ChauffeurBangBangPursuer) {
-			ChauffeurBangBangPursuer p = (ChauffeurBangBangPursuer) pursuer;
-			vis.drawRelativePos(p.getRelativeTrajectory());
-		}
+		relativeVis.resetBoundaryForMax();
+		relativeVis.repaint();
+		
+//		if (pursuer instanceof ChauffeurBangBangPursuer) {
+//			ChauffeurBangBangPursuer p = (ChauffeurBangBangPursuer) pursuer;
+//			vis.drawRelativePos(p.getRelativeTrajectory());
+//		}
 		
 		System.out.println("Press any key to save the image");
 		vis.waitKey();

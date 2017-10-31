@@ -66,7 +66,7 @@ public class App
 				vis.setPursuerState(p.get2DPos(), p.getTheta());
 //				//vis.setPursuerState(p2.getPos(), p2.getTheta(), "p2");
 				vis.setEvaderState(e.get2DPos(), e.getTheta());
-				vis.addPursuerSegment(p.getLastMovement(), "p");
+				vis.addPursuerSegment(p.getLastMovement());
 				//vis.addPursuerSegment(p2.getLastMovement(), "p2");
 				vis.addEvaderSegment(e.getLastMovement());
 //				
@@ -79,7 +79,7 @@ public class App
 			e.hover();
 			p.hover();			
 			
-			vis.setPursuerPath(p.getPath(), "p");
+			vis.setPursuerPath(p.getPath());
 			//vis.setPursuerPath(p2.getPath(), "p2");
 			vis.setEvaderPath(e.getPath());
 			

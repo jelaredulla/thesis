@@ -1,15 +1,9 @@
 package gameplay;
 
-import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
 import java.net.UnknownHostException;
 
-import gameplay.AirSimStructures.DrivetrainType;
-import gameplay.AirSimStructures.Vector3r;
-import gameplay.AirSimStructures.YawMode;
-
 public class ChauffeurDronePlayer extends DronePlayer {
-	final static double deltaT = 0.1; // time step for angle change
+	final static double deltaT = 0.45; // time step for angle change
 	protected double minR; // minimum turning radius
 	
 	ChauffeurDronePlayer(String ip, int port, double v, double r) throws UnknownHostException {

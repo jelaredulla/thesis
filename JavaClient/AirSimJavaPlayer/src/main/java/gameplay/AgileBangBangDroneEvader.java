@@ -1,8 +1,8 @@
 package gameplay;
 
+import java.awt.geom.Point2D;
 import java.net.UnknownHostException;
 
-import gameplay.AirSimStructures.Vector3r;
 
 public class AgileBangBangDroneEvader extends AgileDronePlayer implements Evader {
 		private double captureL; // capture radius
@@ -38,10 +38,23 @@ public class AgileBangBangDroneEvader extends AgileDronePlayer implements Evader
 			
 			if (hunter instanceof ChauffeurDronePlayer) {
 				ChauffeurDronePlayer h = (ChauffeurDronePlayer) hunter;
-				if (Math.sqrt(xDiff*xDiff + yDiff*yDiff) <= (2*h.getMinR())) {
-					double pTheta = hunter.getTheta();
-					steer(pTheta/0.7);
+				if (Math.sqrt(xDiff*xDiff + yDiff*yDiff) <= (h.getMinR())) {
+					double relTheta;
+					Point2D turnCentre = CommonOps.inTurningCircle(this, h);
+					//System.out.println(turnCentre);
+					if (turnCentre != null) {
+						xDiff = position.getX() - turnCentre.getX();
+						yDiff = position.getY() - turnCentre.getY();
+						relTheta = Math.atan2(yDiff, xDiff) + Math.PI;
+					} else {
+						relTheta = Math.atan2(yDiff, xDiff) + Math.PI/4;
+					}
+
+					steer(Math.atan2(Math.sin(relTheta), Math.cos(relTheta)));
 					super.move();
+//					double pTheta = hunter.getTheta();
+//					steer(pTheta/0.7);
+					
 					return;
 				}
 			}

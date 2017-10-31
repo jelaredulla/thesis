@@ -35,18 +35,38 @@ public class DronePlayer extends MultirotorClient implements Pursuer, Evader {
 		return position;
 	}
 	
-	public Point2D getRelativePos(DronePlayer other) {
-		Vector3r ePos = other.getPos();
+	public Point2D getRelativePos(Point2D otherPos) {		
+//		// differences in x, y coords in global frame
+//		double xDiff = (otherPos.getX() - position.getX());
+//		double yDiff = (otherPos.getY() - position.getY());
+//		
+//		// x, y coords of evader wrt pursuer
+//		double x = xDiff*Math.cos(theta) - yDiff*Math.sin(theta);
+//		double y = -xDiff*Math.sin(theta) + yDiff*Math.cos(theta);
+//		
+//		return new Point2D.Double(xDiff, yDiff);
 		
-		// differences in x, y coords in global frame
-		double xDiff = (ePos.getX() - position.getX());
-		double yDiff = (ePos.getY() - position.getY());
+		double x_e = otherPos.getX();
+		double y_e = otherPos.getY();
+		double x_p = position.getX();
+		double y_p = position.getY();
 		
-		// x, y coords of evader wrt pursuer
-		double x = xDiff*Math.cos(theta) - yDiff*Math.sin(theta);
-		double y = -xDiff*Math.sin(theta) + yDiff*Math.cos(theta);
+		double x = (x_e-x_p)*Math.cos(theta) + (y_e-y_p)*Math.sin(theta);
+		double y = -(x_e-x_p)*Math.sin(theta) + (y_e-y_p)*Math.cos(theta);
 		
 		return new Point2D.Double(x, y);
+	}
+	
+	public List<Point2D> getRelativePath(DronePlayer other) {
+		List<Point2D> otherPath = other.getPath();
+		
+		List<Point2D> relativePath = new ArrayList<Point2D>();
+		
+		for (Point2D p : otherPath) {
+			relativePath.add(getRelativePos(p));
+		}
+		
+		return relativePath;		
 	}
 		
 	public double getTheta() {
@@ -57,9 +77,10 @@ public class DronePlayer extends MultirotorClient implements Pursuer, Evader {
 		return (float) maxV;
 	}
 	
+	// no longer swapped!!!
 	// x, y swapped for plotting purposes ONLY!!!
 	public Point2D get2DPos() {
-		return new Point2D.Float(position.getY(), position.getX());
+		return new Point2D.Double(position.getX(), position.getY());
 	}
 	
 	public List<Point2D> getPath() {

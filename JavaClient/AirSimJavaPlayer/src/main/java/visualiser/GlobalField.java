@@ -102,17 +102,7 @@ public class GlobalField extends JPanel implements KeyListener {
 		
 		boundary = maxBoundary;
 	}
-	
-	public void drawRelativePos(List<Point2D> input) {
-		GlobalField relativeVis = new GlobalField(panelWidth, 5, captureL);
-		relativeVis.setPursuerState(new Point2D.Float(0, 0),  0);
 		
-		relativeVis.setEvaderPath(input);
-		relativeVis.resetBoundaryForMax();
-		relativeVis.repaint();
-	}
-	
-	
 	/**
 	 * Sets pursuer segments to draw
 	 * @param input List of Point2D
@@ -203,38 +193,35 @@ public class GlobalField extends JPanel implements KeyListener {
 		
 		// Draw evader path
 		for (Line2D l : evaderPath) {
-			x1 = scaleWorldToPanelWidth(l.getX1());
-			y1 = scaleWorldToPanelHeight(l.getY1());
-			x2 = scaleWorldToPanelWidth(l.getX2());
-			y2 = scaleWorldToPanelHeight(l.getY2());
+			x1 = scaleWorldToPanelWidth(l.getY1());
+			y1 = scaleWorldToPanelHeight(l.getX1());
+			x2 = scaleWorldToPanelWidth(l.getY2());
+			y2 = scaleWorldToPanelHeight(l.getX2());
 			g.setColor(Color.blue);
 			g.drawLine(x1, panelHeight - y1, x2, panelHeight - y2);
 		}
 		
 		// Draw pursuer path
 		for (Line2D l : pursuerPath) {
-			x1 = scaleWorldToPanelWidth(l.getX1());
-			y1 = scaleWorldToPanelHeight(l.getY1());
-			x2 = scaleWorldToPanelWidth(l.getX2());
-			y2 = scaleWorldToPanelHeight(l.getY2());
+			x1 = scaleWorldToPanelWidth(l.getY1());
+			y1 = scaleWorldToPanelHeight(l.getX1());
+			x2 = scaleWorldToPanelWidth(l.getY2());
+			y2 = scaleWorldToPanelHeight(l.getX2());
 			g.setColor(Color.red);
 			g.drawLine(x1, panelHeight - y1, x2, panelHeight - y2);
 		}
-		
-		// Draw pursuer capture radius
-		if (!pursuerPath.isEmpty()) {
-			Line2D lastMovement = pursuerPath.get(pursuerPath.size() - 1);
-			x2 = scaleWorldToPanelWidth(lastMovement.getX2());
-			y2 = scaleWorldToPanelHeight(lastMovement.getY2());
+					
+		if (pPos != null) {
+			g.setColor(Color.red);
+			drawStateTriangle(pPos, pTheta, g);
+			
+			// Draw pursuer capture radius
+			x2 = scaleWorldToPanelWidth(pPos.getY());
+			y2 = scaleWorldToPanelHeight(pPos.getX());
 			int rx = (int) ((captureL/(2*boundary)) * panelWidth); 
 			int ry = (int) ((captureL/(2*boundary)) * panelHeight); 
 			g.setColor(Color.orange);
 			g.drawOval(x2 - rx, panelHeight - (y2 + ry), 2*rx, 2*ry);
-		}
-			
-		if (pPos != null) {
-			g.setColor(Color.red);
-			drawStateTriangle(pPos, pTheta, g);
 		}
 		
 		if (ePos != null) {
@@ -244,8 +231,8 @@ public class GlobalField extends JPanel implements KeyListener {
 	}
 
 	private void drawStateTriangle(Point2D pos, double pTheta2, Graphics g) {
-		double x = pos.getX();
-		double y = pos.getY();
+		double x = pos.getY();
+		double y = pos.getX();
 	
 		double[] xCoords = {x, x + headerLength*Math.sin(pTheta2 + Math.PI + headerAngle),
 				x + headerLength*Math.sin(pTheta2 + Math.PI - headerAngle)};
