@@ -31,21 +31,15 @@ public class DronePlayer extends MultirotorClient implements Pursuer, Evader {
 		path.add(get2DPos());
 	}
 	
+	public void clearPath() {
+		path = new ArrayList<Point2D>();
+	}
+	
 	public Vector3r getPos() {
 		return position;
 	}
 	
 	public Point2D getRelativePos(Point2D otherPos) {		
-//		// differences in x, y coords in global frame
-//		double xDiff = (otherPos.getX() - position.getX());
-//		double yDiff = (otherPos.getY() - position.getY());
-//		
-//		// x, y coords of evader wrt pursuer
-//		double x = xDiff*Math.cos(theta) - yDiff*Math.sin(theta);
-//		double y = -xDiff*Math.sin(theta) + yDiff*Math.cos(theta);
-//		
-//		return new Point2D.Double(xDiff, yDiff);
-		
 		double x_e = otherPos.getX();
 		double y_e = otherPos.getY();
 		double x_p = position.getX();
@@ -81,8 +75,6 @@ public class DronePlayer extends MultirotorClient implements Pursuer, Evader {
 		return (float) maxV;
 	}
 	
-	// no longer swapped!!!
-	// x, y swapped for plotting purposes ONLY!!!
 	public Point2D get2DPos() {
 		return new Point2D.Double(position.getX(), position.getY());
 	}

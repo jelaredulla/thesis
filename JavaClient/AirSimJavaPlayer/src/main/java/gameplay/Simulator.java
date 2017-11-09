@@ -32,15 +32,15 @@ public class Simulator {
 	}
     
     public Simulator(int type) throws UnknownHostException {
-		double gamma = 0.8;
-		double beta = 0.4;
+		double gamma = 0.85;
+		double beta = 0.5;
 		double baseV = 3;
 		double baseR = 4;
 		captureL = beta * baseR;
 		
 		String ipAddress = "127.0.0.1"; // localhost
-		int ePort = 41452;
-		int pPort = 41451;
+		int ePort = 41451;
+		int pPort = 41452;
 		
 		// player maximum velocities
 		double eMaxV = gamma * baseV;
@@ -86,16 +86,17 @@ public class Simulator {
     public void run() throws InterruptedException {
     	int rNum = 5;
     	double r_init = rNum*captureL;
-    	int n = 1;
-    	double theta_init = n * Math.PI/4; 
+    	int count = 0;
+    	double theta_init = count * Math.PI/4; 
     	eInitPos = new Vector3r((float) (r_init*Math.cos(theta_init)), (float) (r_init*Math.sin(theta_init)), planeHeight);
     	evader.setTheta(0);
+    	pursuer.setTheta(0);
     	String folder = "";
-    	String filename = folder+String.format("hCManual_r%d.png", rNum);
+    	String filename = folder+String.format("innovationDemo_round2_", rNum);
     	
     	
-    	GlobalField vis = new GlobalField(1500, 10, captureL);
-    	RelativeField relativeVis = new RelativeField(1500, 10, captureL);
+    	GlobalField vis = new GlobalField(1600, 20, captureL);
+    	RelativeField relativeVis = new RelativeField(800, 20, captureL);
 		relativeVis.setPursuerState(new Point2D.Float(0, 0),  0);
 		XboxController xbox = new XboxController();
 		
@@ -104,67 +105,85 @@ public class Simulator {
 	
 		setupPositions(eInitPos);
 		
-		System.out.println("Press any key to begin the chase:");
-		vis.waitKey();
-		
-		evader.updatePositionData();
-		pursuer.updatePositionData();
-		System.out.println("Evader's initial position: " + evader.getPos());
-		System.out.println("Pursuer's initial position: " + pursuer.getPos());
-		
-		double start = System.currentTimeMillis();
-		t = 0;			
-		while (!pursuer.targetCaught() && !evader.isCaught() && (t < 180)) {
-			if (xbox.gamepadSet()) {
-				evader.steer(xbox.pollLeftJoyStick());
-				evader.move();
-			} else {
-				evader.evade();
+		//int count = 0;
+		double start;
+		while (true) {
+			
+			System.out.println("Press any key to begin the chase:");
+			vis.waitKey();
+			
+			evader.updatePositionData();
+			pursuer.updatePositionData();
+			System.out.println("Evader's initial position: " + evader.getPos());
+			System.out.println("Pursuer's initial position: " + pursuer.getPos());
+			
+	
+			
+			
+			start = System.currentTimeMillis();
+			t = 0;			
+			while (!pursuer.targetCaught() && !evader.isCaught() && (t < 180)) {
+				if (!(evader instanceof AgileEvader) && !(evader instanceof ChauffeurEvader) && (xbox.gamepadSet())) {
+					evader.steer(xbox.pollLeftJoyStick());
+					evader.move();
+				} else {
+					evader.evade();
+				}
+				
+				pursuer.pursue();
+				
+				vis.setPursuerState(pursuer.get2DPos(), pursuer.getTheta());
+				vis.setEvaderState(evader.get2DPos(), evader.getTheta());
+				relativeVis.setEvaderState(pursuer.getCurrentRelativePos(), evader.getTheta() - pursuer.getTheta());
+				
+				vis.addPursuerSegment(pursuer.getLastMovement());
+				vis.addEvaderSegment(evader.getLastMovement());
+				relativeVis.setEvaderPath(pursuer.getRelativeTrajectory());
+	
+				vis.resetBoundaryForMax();
+				vis.repaint();
+				relativeVis.repaint();
+	
+				Thread.sleep(100);
+				t += 0.1;
 			}
 			
-			pursuer.pursue();
+			double totalTime = (System.currentTimeMillis() - start)/1000;
+			System.out.println("Time is: "+totalTime+" seconds");
 			
-			vis.setPursuerState(pursuer.get2DPos(), pursuer.getTheta());
-			vis.setEvaderState(evader.get2DPos(), evader.getTheta());
-			relativeVis.setEvaderState(pursuer.getCurrentRelativePos(), evader.getTheta() - pursuer.getTheta());
+			evader.hover();
+			pursuer.hover();			
 			
-			vis.addPursuerSegment(pursuer.getLastMovement());
-			vis.addEvaderSegment(evader.getLastMovement());
-			relativeVis.setEvaderPath(pursuer.getRelativeTrajectory());
-
+			vis.setPursuerPath(pursuer.getPath());
+			vis.setEvaderPath(evader.getPath());
+			
 			vis.resetBoundaryForMax();
 			vis.repaint();
+			
+			relativeVis.resetBoundaryForMax();
 			relativeVis.repaint();
-
-			Thread.sleep(100);
-			t += 0.1;
+			
+			System.out.println("Press any key to save the image");
+			vis.waitKey();
+			
+			vis.saveImage(filename+count+".png");
+			
+			
+			vis.clearAll();
+			
+			evader.clearPath();
+			pursuer.clearPath();
+			
+			count++;
+			
+			theta_init = count * Math.PI/4; 
+	    	eInitPos = new Vector3r((float) (r_init*Math.cos(theta_init)), (float) (r_init*Math.sin(theta_init)), planeHeight);
+	    	evader.setTheta(0);
+	    	pursuer.setTheta(0);
+			reset(eInitPos);
 		}
 		
-		double totalTime = (System.currentTimeMillis() - start)/1000;
-		System.out.println("Time is: "+totalTime+" seconds");
-		System.out.println("Time is: "+t+" seconds");
 		
-		evader.hover();
-		pursuer.hover();			
-		
-		vis.setPursuerPath(pursuer.getPath());
-		vis.setEvaderPath(evader.getPath());
-		
-		vis.resetBoundaryForMax();
-		vis.repaint();
-		
-		relativeVis.resetBoundaryForMax();
-		relativeVis.repaint();
-		
-//		if (pursuer instanceof ChauffeurBangBangPursuer) {
-//			ChauffeurBangBangPursuer p = (ChauffeurBangBangPursuer) pursuer;
-//			vis.drawRelativePos(p.getRelativeTrajectory());
-//		}
-		
-		System.out.println("Press any key to save the image");
-		vis.waitKey();
-		
-		vis.saveImage(filename);
     }
     
     public void setupAPIControl() throws InterruptedException {
@@ -176,8 +195,8 @@ public class Simulator {
     }
     
     public void setupPositions(Vector3r evaderInitPos) throws InterruptedException {
+    	setupPosition(pursuer, new Vector3r(0, 0, planeHeight));
     	setupPosition(evader, evaderInitPos);
-		setupPosition(pursuer, new Vector3r(0, 0, planeHeight));
     }
     
     private void setupPosition(DronePlayer drone, Vector3r initPos) throws InterruptedException {
@@ -193,5 +212,17 @@ public class Simulator {
 		// wait for the drone to travel so the initial position is updated correctly
 		Thread.sleep((long) (setupWaitTime * 1000)); 
 		drone.updatePositionData();	
+    }
+    
+    private void reset(Vector3r evaderInitPos) {
+    	double eDist = evader.get2DPos().distance(0,  0);
+    	double pDist = pursuer.get2DPos().distance(0, 0);
+    	if (eDist < pDist) {
+    		evader.moveToPosition(evaderInitPos, setupVelocity);
+    		pursuer.moveToPosition(new Vector3r(0, 0, planeHeight), setupVelocity);
+    	} else {
+    		pursuer.moveToPosition(new Vector3r(0, 0, planeHeight), setupVelocity);
+    		evader.moveToPosition(evaderInitPos, setupVelocity);
+    	}
     }
 }
