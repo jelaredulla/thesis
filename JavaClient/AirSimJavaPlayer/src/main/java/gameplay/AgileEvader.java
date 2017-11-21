@@ -5,35 +5,34 @@ import java.net.UnknownHostException;
 import java.util.Random;
 
 public class AgileEvader extends AgileDronePlayer implements Evader {
-	private double captureL; // capture radius
-	private DronePlayer hunter;
 	
 	AgileEvader(String ip, int port, double v, double l, DronePlayer p) throws UnknownHostException {
 		super(ip, port, v);
 		
-		captureL = l;
-		setHunter(p);
+		setCaptureL(l);
+		setOpponent(p);
 	}
 	
 	AgileEvader(String ip, int port, double v, double l) throws UnknownHostException {
 		super(ip, port, v);
 		
-		captureL = l;
+		setCaptureL(l);
 	}
 	
-	public void setHunter(DronePlayer p) {
-		hunter = p;
+	AgileEvader(String ip, int port, double v, DronePlayer p) throws UnknownHostException {
+		super(ip, port, v);
+		
+		setOpponent(p);
 	}
 	
-	public boolean isCaught() {
-		return (position.distance(hunter.getPos()) <= captureL);
+	AgileEvader(String ip, int port, double v) throws UnknownHostException {
+		super(ip, port, v);
 	}
 	
-	public Point2D getCurrentRelativePos() {
-		return getRelativePos(hunter.get2DPos());
-	}
 	
-	public void evadePlain() {
+	
+
+	public void evade() {
 		Point2D relativePos = getCurrentRelativePos();
 		
 		double x = relativePos.getX();
@@ -43,15 +42,15 @@ public class AgileEvader extends AgileDronePlayer implements Evader {
 		super.move();
 	}
 
-	public void evade() {
+	public void evadeJerk() {
 		Point2D relativePos = getCurrentRelativePos();
 		
 		double x = relativePos.getX();
 		double y = relativePos.getY();
 		
 		double relTheta = theta + Math.atan2(y, x) + Math.PI;
-		if (hunter instanceof ChauffeurDronePlayer) {
-			ChauffeurDronePlayer h = (ChauffeurDronePlayer) hunter;
+		if (opponent instanceof ChauffeurDronePlayer) {
+			ChauffeurDronePlayer h = (ChauffeurDronePlayer) opponent;
 			if (Math.hypot(x, y) <= (h.getMinR())) {
 //				Random signGenerator = new Random();
 //				relTheta += ( signGenerator.nextBoolean() ? 1 : -1 )*Math.PI/2;

@@ -6,34 +6,35 @@ import java.net.UnknownHostException;
 import gameplay.AirSimStructures.Vector3r;
 
 public class ChauffeurGOTCEvader extends ChauffeurDronePlayer implements Evader {
-		private double captureL; // capture radius
-		private DronePlayer hunter;
-		private float pVel;
+		private double pVel;
 		
 		ChauffeurGOTCEvader(String ip, int port, double v, double r, double l, DronePlayer p) throws UnknownHostException {
 			super(ip, port, v, r);
 			
-			captureL = l;
-			setHunter(p);
+			setCaptureL(l);
+			setOpponent(p);
 		}
 		
 		ChauffeurGOTCEvader(String ip, int port, double v, double r, double l) throws UnknownHostException {
 			super(ip, port, v, r);
 			
-			captureL = l;
+			setCaptureL(l);
 		}
 		
-		public void setHunter(DronePlayer p) {
-			hunter = p;
-			pVel = hunter.getMaxV();
+		ChauffeurGOTCEvader(String ip, int port, double v, double r, DronePlayer p) throws UnknownHostException {
+			super(ip, port, v, r);
+			
+			setOpponent(p);
 		}
 		
-		public boolean isCaught() {
-			return (position.distance(hunter.getPos()) <= captureL);
+		ChauffeurGOTCEvader(String ip, int port, double v, double r) throws UnknownHostException {
+			super(ip, port, v, r);
 		}
 		
-		public Point2D getCurrentRelativePos() {
-			return getRelativePos(hunter.get2DPos());
+		@Override
+		public void setOpponent(DronePlayer p) {
+			super.setOpponent(p);
+			pVel = opponent.getMaxV();
 		}
 		
 		public void evade() {
@@ -51,19 +52,10 @@ public class ChauffeurGOTCEvader extends ChauffeurDronePlayer implements Evader 
 		}
 
 		public void evadeOld() {
-			Vector3r pPos = hunter.getPos();
-			double pTheta = hunter.getTheta();
-			
-			// differences in x, y coords in global frame
-			double xDiff = (position.getX() - pPos.getX());
-			double yDiff = (position.getY() - pPos.getY());
-			
-			// x, y coords of evader wrt pursuer
-			double x = xDiff*Math.cos(pTheta) - yDiff*Math.sin(pTheta);
-			double y = -xDiff*Math.sin(pTheta) + yDiff*Math.cos(pTheta);
+			Point2D pPos = getCurrentRelativePos();
 
 			// relative angle
-			double relativeTheta = Math.atan2(y, x);
+			double relativeTheta = Math.atan2(pPos.getY(), pPos.getY());
 						
 			// control variable, which is effectively turning radius
 			double phi = -Math.signum(maxV - pVel*Math.sin(relativeTheta));

@@ -1,7 +1,10 @@
 package gameplay;
 
+import java.awt.geom.Point2D;
+import java.util.List;
+
 public interface Pursuer {
-	public void setTarget(DronePlayer e);
-	public boolean targetCaught();
 	public void pursue();
+	public void updatePositionData();
+	public List<Point2D> getRelativePath(DronePlayer e);
 }

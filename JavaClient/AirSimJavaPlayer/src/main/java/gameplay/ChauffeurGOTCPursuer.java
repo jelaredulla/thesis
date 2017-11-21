@@ -8,46 +8,55 @@ import java.util.List;
 import gameplay.AirSimStructures.Vector3r;
 
 public class ChauffeurGOTCPursuer extends ChauffeurDronePlayer implements Pursuer {
-	private double captureL; // capture radius
-	private DronePlayer target;
-	private float eVel;
+	private double eVel;
 	
-	
-	private Point2D relativePos;
 	private List<Point2D> relativeTrajectory;
 		
 	ChauffeurGOTCPursuer(String ip, int port, double v, double r, double l, DronePlayer e) throws UnknownHostException {
 		super(ip, port, v, r);
 		
-		captureL = l;
 		relativeTrajectory = new ArrayList<Point2D>();
 		
-		setTarget(e);
+		setCaptureL(l);
+		setOpponent(e);
 	}
 	
-	public void setTarget(DronePlayer e) {
-		target = e;
-		eVel = target.getMaxV();
+	ChauffeurGOTCPursuer(String ip, int port, double v, double r, double l) throws UnknownHostException {
+		super(ip, port, v, r);
+		
+		relativeTrajectory = new ArrayList<Point2D>();
+		
+		setCaptureL(l);
 	}
 	
-	public boolean targetCaught() {
-		return (position.distance(target.getPos()) <= captureL);
+	ChauffeurGOTCPursuer(String ip, int port, double v, double r, DronePlayer e) throws UnknownHostException {
+		super(ip, port, v, r);
+		
+		relativeTrajectory = new ArrayList<Point2D>();
+		
+		setOpponent(e);
+	}
+	
+	ChauffeurGOTCPursuer(String ip, int port, double v, double r) throws UnknownHostException {
+		super(ip, port, v, r);
 	}
 	
 	@Override
+	public void setOpponent(DronePlayer e) {
+		super.setOpponent(e);
+		eVel = opponent.getMaxV();
+	}
+		
+	@Override
 	public void updatePositionData() {
 		super.updatePositionData();
-		relativeTrajectory = getRelativePath(target);
+		relativeTrajectory = getRelativePath(opponent);
 	}
 	
 	public List<Point2D> getRelativeTrajectory() {
 		return relativeTrajectory;
 	}
-	
-	public Point2D getCurrentRelativePos() {
-		return getRelativePos(target.get2DPos());
-	}
-		
+			
 	public void pursue() {
 		Point2D relativePos = getCurrentRelativePos();
 		
@@ -65,7 +74,7 @@ public class ChauffeurGOTCPursuer extends ChauffeurDronePlayer implements Pursue
 	}
 
 	public void pursueOld() {		
-		Vector3r ePos = target.getPos();
+		Vector3r ePos = opponent.getPos();
 		
 		// differences in x, y coords in global frame
 		double xDiff = (ePos.getX() - position.getX());

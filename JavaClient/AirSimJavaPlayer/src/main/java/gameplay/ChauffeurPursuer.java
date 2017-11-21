@@ -8,44 +8,50 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
 public class ChauffeurPursuer extends ChauffeurDronePlayer implements Pursuer {
-	private double captureL; // capture radius
-	private DronePlayer target;
-	
-	private Point2D relativePos;
 	private List<Point2D> relativeTrajectory;
 	
 	ChauffeurPursuer(String ip, int port, double v, double r, double l, DronePlayer e) throws UnknownHostException {
 		super(ip, port, v, r);
 		
-		captureL = l;
 		relativeTrajectory = new ArrayList<Point2D>();
 		
-		setTarget(e);
+		setCaptureL(l);
+		setOpponent(e);
 	}
 	
-	public void setTarget(DronePlayer e) {
-		target = e;
+	ChauffeurPursuer(String ip, int port, double v, double r, double l) throws UnknownHostException {
+		super(ip, port, v, r);
+		
+		relativeTrajectory = new ArrayList<Point2D>();
+		
+		setCaptureL(l);
 	}
 	
-	public boolean targetCaught() {
-		return (position.distance(target.getPos()) <= captureL);
+	ChauffeurPursuer(String ip, int port, double v, double r, DronePlayer e) throws UnknownHostException {
+		super(ip, port, v, r);
+		
+		relativeTrajectory = new ArrayList<Point2D>();
+		
+		setOpponent(e);
+	}
+	
+	ChauffeurPursuer(String ip, int port, double v, double r) throws UnknownHostException {
+		super(ip, port, v, r);
+		
+		relativeTrajectory = new ArrayList<Point2D>();
 	}
 	
 	@Override
 	public void updatePositionData() {
 		super.updatePositionData();
-		relativeTrajectory = getRelativePath(target);
+		relativeTrajectory = getRelativePath(opponent);
 	}
 	
 	public List<Point2D> getRelativeTrajectory() {
 		return relativeTrajectory;
 	}
 	
-	public Point2D getCurrentRelativePos() {
-		return getRelativePos(target.get2DPos());
-	}
-	
-	public void pursuePlain() {
+	public void pursue() {
 		Point2D relativePos = getCurrentRelativePos();
 		
 		double x = relativePos.getX();
@@ -68,7 +74,7 @@ public class ChauffeurPursuer extends ChauffeurDronePlayer implements Pursuer {
 		super.move();
 	}
 		
-	public void pursue() {
+	public void pursueSwerve() {
 		Point2D relativePos = getCurrentRelativePos();
 		
 		double x = relativePos.getX();
@@ -86,7 +92,7 @@ public class ChauffeurPursuer extends ChauffeurDronePlayer implements Pursuer {
 		} else {
 			phi = Math.signum(y);
 			
-			if (target instanceof AgileDronePlayer) {
+			if (opponent instanceof AgileDronePlayer) {
 				double distance = Math.hypot(x, y);
 				if ((Math.abs(y) > minR/2) && (distance <= 2*minR)) {
 					phi = 0;

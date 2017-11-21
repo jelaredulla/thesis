@@ -16,14 +16,18 @@ public class DronePlayer extends MultirotorClient implements Pursuer, Evader {
 	protected double maxV; // maximum velocity, m/s
 	private ArrayList<Point2D> path = new ArrayList<Point2D>(); // history of player movement
 	
+	protected DronePlayer opponent; // opponent of the player
+	protected double captureL; // capture radius
+	
 	DronePlayer(String ip, int port, double v) throws UnknownHostException {
 		super(ip, port);
 		
-		position = new Vector3r(0f, 0f, 0f);
-		theta = 0;
 		maxV = v;
 		
-		// TODO Auto-generated constructor stub
+		position = new Vector3r(0f, 0f, 0f);
+		theta = 0;
+		opponent = null;
+		captureL = -1;
 	}
 	
 	public void updatePositionData() {
@@ -71,8 +75,8 @@ public class DronePlayer extends MultirotorClient implements Pursuer, Evader {
 		theta = initAngle;
 	}
 	
-	public float getMaxV() {
-		return (float) maxV;
+	public double getMaxV() {
+		return maxV;
 	}
 	
 	public Point2D get2DPos() {
@@ -94,6 +98,22 @@ public class DronePlayer extends MultirotorClient implements Pursuer, Evader {
 		
 		return new Line2D.Float(prev, current);
 	}
+
+	public void setOpponent(DronePlayer e) {
+		opponent = e;
+	}
+	
+	public void setCaptureL(double l) {
+		captureL = l;
+	}
+	
+	public boolean gameOver() {
+		if ((opponent != null) && (captureL >= 0)) {
+			return (position.distance(opponent.getPos()) < captureL);
+		}
+		
+		return false;
+	}
 	
 	public void steer(double control) {
 		throw new UnsupportedOperationException();
@@ -103,35 +123,20 @@ public class DronePlayer extends MultirotorClient implements Pursuer, Evader {
 		throw new UnsupportedOperationException();
 	}
 
-	public void setHunter(DronePlayer e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public boolean isCaught() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
 	public void evade() {
 		throw new UnsupportedOperationException();
 	}
 
-	public void setTarget(DronePlayer e) {
-		throw new UnsupportedOperationException();
-	}
-
-	public boolean targetCaught() {
-		throw new UnsupportedOperationException();
-	}
-
 	public void pursue() {
-		throw new UnsupportedOperationException();
-		
+		throw new UnsupportedOperationException();		
 	}
 	
 	public Point2D getCurrentRelativePos() {
-		throw new UnsupportedOperationException();
+		if (opponent != null) {
+			return getRelativePos(opponent.get2DPos());
+		} else {
+			throw new UnsupportedOperationException();
+		}
 	}
 	
 	public List<Point2D> getRelativeTrajectory() {

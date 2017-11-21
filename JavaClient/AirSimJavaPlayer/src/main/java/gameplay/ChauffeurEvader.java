@@ -6,35 +6,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChauffeurEvader extends ChauffeurDronePlayer implements Evader {
-	private double captureL; // capture radius
-	private DronePlayer hunter;
 	
 	ChauffeurEvader(String ip, int port, double v, double r, double l, DronePlayer e) throws UnknownHostException {
 		super(ip, port, v, r);
 		
-		captureL = l;
-		
-		setHunter(e);
+		setCaptureL(l);
+		setOpponent(e);
 	}
 	
 	ChauffeurEvader(String ip, int port, double v, double r, double l) throws UnknownHostException {
 		super(ip, port, v, r);
 		
-		captureL = l;
+		setCaptureL(l);
 	}
 	
-	public void setHunter(DronePlayer e) {
-		hunter = e;
+	ChauffeurEvader(String ip, int port, double v, double r, DronePlayer e) throws UnknownHostException {
+		super(ip, port, v, r);
+		
+		setOpponent(e);
 	}
 	
-	public boolean isCaught() {
-		return (position.distance(hunter.getPos()) <= captureL);
+	ChauffeurEvader(String ip, int port, double v, double r) throws UnknownHostException {
+		super(ip, port, v, r);
 	}
-		
-	public Point2D getCurrentRelativePos() {
-		return getRelativePos(hunter.get2DPos());
-	}
-		
+
 	public void evade() {
 		Point2D relativePos = getCurrentRelativePos();
 		double x = relativePos.getX();
